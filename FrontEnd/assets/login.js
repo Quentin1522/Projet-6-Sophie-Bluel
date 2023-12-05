@@ -7,7 +7,7 @@ function validerEmailEtMotDePasse(email, password, motDePasseResponse) {
   const emailValide = emailRegex.test(email);
 
   // Validation du mot de passe en comparant avec celui de la réponse
-  const motDePasseValide = password === motDePasseResponse;
+  const motDePasseValide = password === "S0phie";
 
   // Retourne true si l'email et le mot de passe sont valides, sinon false
   return emailValide && motDePasseValide;
@@ -64,12 +64,3 @@ form.addEventListener("submit", async (event) => {
     alert("Une erreur inattendue s'est produite. Veuillez réessayer.");
   }
 });
-
-// Fonction pour se déconnecter
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "../index.html";
-}
-
-// Appel de la fonction de déconnexion
-logout();
