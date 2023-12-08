@@ -1,27 +1,33 @@
-// Sélection des éléments du DOM
 const modalWrapper = document.querySelector(".modal-wrapper");
 const modalTriggers = document.querySelectorAll(".modal-trigger");
 
-// Ajout des écouteurs d'événements sur chaque élément déclencheur de la modal
 modalTriggers.forEach((trigger) => {
-  // Lorsqu'un élément déclencheur est cliqué, la fonction toggleModal est appelée
   trigger.addEventListener("click", toggleModal);
 });
 
-// Fonction pour basculer l'état de la modal (active/inactive)
 function toggleModal(e) {
-  // Empêche le comportement par défaut du lien (évite le rechargement de page)
   e.preventDefault();
-
-  // Bascule la classe "active" sur l'élément modalWrapper pour afficher ou masquer la modal
   modalWrapper.classList.toggle("active");
 }
 
-const apiDetails = {
-  title: e.target.getAttribute("data-title"),
-  imageUrl: e.target.getAttribute("data-image-url"),
-  description: e.target.getAttribute("data-description"),
-};
+// Fonction pour se déconnecter
+function logout() {
+  // Supprimer le token du localStorage
+  localStorage.removeItem("token");
 
-//Affiche les détails de l'oeuvre dans la modal
-displayApiDetails(apiDetails);
+  // Rediriger l'utilisateur vers la page d'index (ou une autre page de votre choix)
+  window.location.href = "./index.html";
+}
+
+// Assurez-vous que le bouton de déconnexion a été récupéré avec succès
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+  // Ajouter un gestionnaire d'événements au clic sur le bouton de déconnexion
+  logoutBtn.addEventListener("click", () => {
+    // Appeler la fonction de déconnexion
+    logout();
+  });
+} else {
+  console.error("Erreur : Le bouton de déconnexion n'a pas été trouvé.");
+}
