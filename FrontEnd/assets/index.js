@@ -44,7 +44,7 @@ const createCategoryButtons = async () => {
   // Pour chaque catégorie, créer un bouton et l'ajouter aux filtres
   categories.forEach((category) => {
     const btn = document.createElement("button");
-    btn.textContent = category.name.toUpperCase();
+    btn.textContent = category.name;
     btn.id = category.id;
     filters.appendChild(btn);
   });

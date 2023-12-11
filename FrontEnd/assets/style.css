@@ -350,7 +350,7 @@ footer nav ul {
 .modal,
 .photos {
   width: 95%;
-  max-height: 720px;
+  max-height: 630px;
   max-width: 430px;
   background-color: #ffffff;
   border-radius: 5px;
@@ -363,8 +363,83 @@ footer nav ul {
 
 .photos {
   position: fixed;
-  background-color: blue;
-  height: 720px;
+  background-color: #ffffff;
+  height: 580px;
+}
+
+.arrow {
+  position: absolute;
+  left: 10px;
+  top: 15px;
+}
+
+.close-photo {
+  position: absolute;
+  left: 560px;
+  top: 10px;
+}
+
+.conteneur-ajout {
+  background-color: #e8f1f6;
+  height: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.conteneur-ajout svg {
+  margin: 10px 0;
+}
+
+.conteneur-ajout button {
+  color: #306685;
+  border-radius: 50px;
+  background-color: #cbd6dc;
+  border: none;
+  width: 173px;
+  height: 36px;
+}
+
+.conteneur-ajout p {
+  color: #444;
+  text-align: center;
+  font-family: Work Sans;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.form-photo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-photo hr {
+  width: 420px;
+}
+
+.form-photo label {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.form-photo input,
+select {
+  width: 420px;
+  height: 51px;
+  background-color: #fff;
+  box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.09);
+  border: none;
+}
+
+.form-photo #submitValider {
+  width: 233px;
+  height: 36px;
+  border-radius: 60px;
+  background: #a7a7a7;
 }
 
 #gallery-modal {
@@ -379,8 +454,7 @@ footer nav ul {
   width: 100%;
 }
 
-.close-modal,
-.closePhoto {
+.close-modal {
   border: none;
   border-radius: 5px;
   position: absolute;
