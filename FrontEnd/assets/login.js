@@ -28,7 +28,7 @@ form.addEventListener("submit", async (event) => {
       const token = data.token;
 
       // Redirection vers "modif.html" si la validation réussit
-      window.location.href = "modif.html";
+      window.location.href = "../index.html";
 
       // Enregistrer le token dans le localStorage
       localStorage.setItem("token", token);
@@ -42,3 +42,53 @@ form.addEventListener("submit", async (event) => {
     alert("Une erreur inattendue s'est produite. Veuillez réessayer.");
   }
 });
+
+// Fonction pour créer et ajouter dynamiquement le bouton "login" dans le menu
+function createLoginButton() {
+  // Créez l'élément du bouton
+  const loginButton = document.createElement("li");
+  loginButton.id = "loginButton";
+  loginButton.textContent = "login"; // Le texte initial du bouton
+  loginButton.addEventListener("click", redirectToLoginPage);
+
+  // Récupérez l'élément de la liste de navigation
+  const nav = document.querySelector("nav ul");
+
+  // Récupérez les deux premiers éléments <li>
+  const firstLi = nav.children[0];
+  const secondLi = nav.children[1];
+
+  // Ajoutez le bouton après les deux premiers éléments <li>
+  nav.insertBefore(loginButton, secondLi.nextSibling);
+
+  // Mettez à jour le contenu et le style du bouton en fonction de l'état de connexion initial
+  updateLoginButton();
+}
+
+// Fonction pour vérifier l'état de connexion (à remplacer par votre propre logique de connexion)
+function isLoggedIn() {
+  // Remplacez ceci par votre logique de connexion
+  return false;
+}
+
+// Fonction de gestionnaire de redirection vers la page login.html
+function redirectToLoginPage() {
+  // Redirection vers la page login.html
+  window.location.href = "assets/login.html";
+}
+
+// Fonction pour mettre à jour le contenu et le style du bouton en fonction de l'état de connexion
+function updateLoginButton() {
+  const loginButton = document.getElementById("loginButton");
+
+  if (isLoggedIn()) {
+    loginButton.textContent = "logout";
+    // Ajoutez des styles ou des classes CSS pour le bouton de déconnexion si nécessaire
+  } else {
+    loginButton.textContent = "login";
+    // Ajoutez des styles ou des classes CSS pour le bouton de connexion si nécessaire
+  }
+}
+
+// Appel initial pour créer le bouton au chargement de la page
+document.addEventListener("DOMContentLoaded", createLoginButton);

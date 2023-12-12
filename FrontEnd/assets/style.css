@@ -367,18 +367,6 @@ footer nav ul {
   height: 580px;
 }
 
-.arrow {
-  position: absolute;
-  left: 10px;
-  top: 15px;
-}
-
-.close-photo {
-  position: absolute;
-  left: 560px;
-  top: 10px;
-}
-
 .conteneur-ajout {
   background-color: #e8f1f6;
   height: 170px;
@@ -454,13 +442,17 @@ select {
   width: 100%;
 }
 
-.close-modal {
-  border: none;
-  border-radius: 5px;
+.close-modal,
+.close-photo {
   position: absolute;
   top: 2%;
   right: 10px;
-  margin: 0;
+}
+
+.arrow {
+  position: absolute;
+  left: 10px;
+  top: 2%;
 }
 
 .container-btn {

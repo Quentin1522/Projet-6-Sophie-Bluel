@@ -20,6 +20,21 @@ modalTriggers.forEach((trigger) => {
 
 function togglePhoto(e) {
   e.preventDefault();
+
+  // Ajouter un gestionnaire d'événements à la croix de la deuxième modal
+  const closePhotoBtn = document.querySelector(".close-photo");
+
+  // Ajouter un gestionnaire d'événements pour fermer la modal
+  function closeModal() {
+    wrapperPhoto.classList.remove("active");
+    closePhotoBtn.removeEventListener("click", closeModal);
+  }
+
+  closePhotoBtn.addEventListener("click", function (event) {
+    event.stopPropagation(); // Empêcher la propagation au conteneur général
+    closeModal();
+  });
+
   wrapperPhoto.classList.toggle("active");
 }
 
