@@ -2,7 +2,6 @@
 const modalWrapper = document.querySelector(".modal-wrapper");
 const modalTriggers = document.querySelectorAll(".modal-trigger");
 const galleryModal = document.getElementById("gallery-modal");
-const logoutBtn = document.getElementById("logoutBtn");
 const wrapperPhoto = document.querySelector(".wrapperPhoto");
 const ajoutBtn = document.querySelector(".ajout");
 const photoTriggers = document.querySelectorAll(".photo-trigger");
@@ -98,17 +97,3 @@ const initializeGalleryModal = async () => {
 
 // Appeler la fonction d'initialisation de la galerie lors du chargement de la page
 document.addEventListener("DOMContentLoaded", initializeGalleryModal);
-
-//Déconnexion//////////////////////////////////////////////////////////////
-// Événement au clic sur le bouton de déconnexion
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", logout);
-} else {
-  console.error("Erreur : Le bouton de déconnexion n'a pas été trouvé.");
-}
-
-// Fonction de déconnexion
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "./index.html";
-}

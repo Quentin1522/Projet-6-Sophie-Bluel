@@ -2,6 +2,7 @@
 const email = document.getElementById("email");
 const password = document.getElementById("mdp");
 const form = document.querySelector("form");
+const logoutBtn = document.getElementById("logoutBtn");
 
 // Ajouter un écouteur d'événements au formulaire
 form.addEventListener("submit", async (event) => {
@@ -48,7 +49,7 @@ function createLoginButton() {
   // Créez l'élément du bouton
   const loginButton = document.createElement("li");
   loginButton.id = "loginButton";
-  loginButton.textContent = "login"; // Le texte initial du bouton
+  loginButton.textContent = "login";
   loginButton.addEventListener("click", redirectToLoginPage);
 
   // Récupérez l'élément de la liste de navigation
@@ -65,10 +66,11 @@ function createLoginButton() {
   updateLoginButton();
 }
 
-// Fonction pour vérifier l'état de connexion (à remplacer par votre propre logique de connexion)
+// Fonction pour vérifier l'état de connexion
 function isLoggedIn() {
-  // Remplacez ceci par votre logique de connexion
-  return false;
+  // Vérifiez si un token est présent dans le localStorage
+  const token = localStorage.getItem("token");
+  return !!token; // Renvoie true si le token existe, sinon false
 }
 
 // Fonction de gestionnaire de redirection vers la page login.html
@@ -82,13 +84,31 @@ function updateLoginButton() {
   const loginButton = document.getElementById("loginButton");
 
   if (isLoggedIn()) {
+    console.log("User is logged in");
     loginButton.textContent = "logout";
     // Ajoutez des styles ou des classes CSS pour le bouton de déconnexion si nécessaire
   } else {
+    console.log("User is not logged in");
     loginButton.textContent = "login";
     // Ajoutez des styles ou des classes CSS pour le bouton de connexion si nécessaire
   }
 }
-
 // Appel initial pour créer le bouton au chargement de la page
-document.addEventListener("DOMContentLoaded", createLoginButton);
+document.addEventListener("DOMContentLoaded", () => {
+  createLoginButton();
+  updateLoginButton(); // Mettez à jour le bouton lors du chargement de la page
+});
+
+//Déconnexion//////////////////////////////////////////////////////////////
+// Événement au clic sur le bouton de déconnexion
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", logout);
+} else {
+  console.error("Erreur : Le bouton de déconnexion n'a pas été trouvé.");
+}
+
+// Fonction de déconnexion
+function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "../index.html";
+}
