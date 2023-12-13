@@ -4,50 +4,61 @@ const modalTriggers = document.querySelectorAll(".modal-trigger");
 const galleryModal = document.getElementById("gallery-modal");
 const wrapperPhoto = document.querySelector(".wrapperPhoto");
 const ajoutBtn = document.querySelector(".ajout");
+const ajoutFile = document.querySelector(".ajout-file");
 const photoTriggers = document.querySelectorAll(".photo-trigger");
+const closePhotoBtn = document.querySelector(".close-photo");
+const arrowBtn = document.querySelector(".arrow");
+const formPhoto = document.querySelector(".form-photo");
 
-//Modal/////////////////////////////////////////////////////////////
-// Fonction pour basculer l'état du modal
+//variable pour stocker l'image
+let image = "";
+
+// Fonction pour basculer l'état du modal principal
 function toggleModal(e) {
   e.preventDefault();
   modalWrapper.classList.toggle("active");
 }
-// Attacher les gestionnaires d'événements pour les déclencheurs modaux
+
+// Fonction pour basculer l'état de la galerie photo
+function toggleGalleryModal(e) {
+  galleryModal.classList.toggle("active");
+}
+
+// Fonction pour basculer l'état de l'ajout de photo
+function toggleAddPhotoModal(e) {
+  wrapperPhoto.classList.toggle("active");
+}
+
+// Attacher les gestionnaires d'événements pour les déclencheurs modaux principaux
 modalTriggers.forEach((trigger) => {
   trigger.addEventListener("click", toggleModal);
 });
 
-function togglePhoto(e) {
-  e.preventDefault();
-
-  // Ajouter un gestionnaire d'événements à la croix de la deuxième modal
-  const closePhotoBtn = document.querySelector(".close-photo");
-
-  // Ajouter un gestionnaire d'événements pour fermer la modal
-  function closeModal() {
-    wrapperPhoto.classList.remove("active");
-    closePhotoBtn.removeEventListener("click", closeModal);
-  }
-
-  closePhotoBtn.addEventListener("click", function (event) {
-    event.stopPropagation(); // Empêcher la propagation au conteneur général
-    closeModal();
-  });
-
-  wrapperPhoto.classList.toggle("active");
-}
-
+// Attacher les gestionnaires d'événements pour le bouton "Gallerie photo"
 photoTriggers.forEach((trigger) => {
-  trigger.addEventListener("click", togglePhoto);
+  trigger.addEventListener("click", toggleGalleryModal);
 });
 
-// Ajouter un gestionnaire d'événements pour le bouton "Ajouter une photo"
-ajoutBtn.addEventListener("click", function (e) {});
+// Attacher un gestionnaire d'événements pour le bouton "Ajouter une photo"
+ajoutBtn.addEventListener("click", toggleAddPhotoModal);
 
-//Gallerie////////////////////////////////////////////////////////////////////////
-// Fonction asynchrone pour récupérer les œuvres depuis l'API
+// Attacher un gestionnaire d'événements pour la croix de la deuxième modal
+closePhotoBtn.addEventListener("click", toggleAddPhotoModal);
+
+// Ajouter un gestionnaire d'événements à la flèche dans la deuxième modal
+arrowBtn.addEventListener("click", (e) => {
+  if (e) {
+    e.preventDefault();
+  }
+
+  toggleAddPhotoModal();
+  toggleGalleryModal();
+});
+
+// Fonction asynchrone pour récupérer les œuvres depuis l'API (exemple simulé)
 const fetchWorks = async () => {
   try {
+    // Remplacez cette URL par l'URL réelle de votre API
     const response = await fetch("http://localhost:5678/api/works");
     if (!response.ok) {
       throw new Error(
@@ -61,7 +72,7 @@ const fetchWorks = async () => {
       "Erreur lors de la récupération des données de l'API :",
       error
     );
-    throw error; // Propage l'erreur pour une gestion ultérieure si nécessaire
+    throw error;
   }
 };
 
@@ -84,13 +95,59 @@ const displayWorks = (works) => {
   });
 };
 
+// Fonction asynchrone pour ajouter une photo à la galerie
+const addPhotoToGallery = async (title, category, imageUrl) => {
+  try {
+    // Remplacez cette URL par l'URL réelle de votre API pour ajouter une photo
+    const response = await fetch("http://localhost:5678/api/works", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title,
+        category: category,
+        imageUrl: imageUrl,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Erreur lors de l'ajout de la photo. Code HTTP : ${response.status}`
+      );
+    }
+
+    // Récupérer à nouveau les œuvres après l'ajout de la nouvelle photo
+    const updatedWorks = await fetchWorks();
+    displayWorks(updatedWorks);
+
+    // Fermer la modal d'ajout de photo
+    toggleAddPhotoModal();
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de la photo :", error);
+    // Gérer les erreurs ici (affichage d'un message à l'utilisateur, journalisation, etc.)
+  }
+};
+
+// Gestionnaire d'événements pour la soumission du formulaire
+formPhoto.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  // Récupération des données du formulaire
+  const title = document.getElementById("title").value;
+  const category = document.querySelector("select").value;
+  const imageUrl = "URL_DE_VOTRE_IMAGE"; // Remplacez par l'URL réelle de l'image
+
+  // Ajouter la photo à la galerie
+  await addPhotoToGallery(title, category, imageUrl);
+});
+
 // Fonction asynchrone pour initialiser la galerie
 const initializeGalleryModal = async () => {
   try {
     const works = await fetchWorks();
     displayWorks(works);
   } catch (error) {
-    // Gérer l'erreur ici selon vos besoins
     console.error("Erreur lors de l'initialisation de la galerie :", error);
   }
 };

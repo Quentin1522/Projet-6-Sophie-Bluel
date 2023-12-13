@@ -89,3 +89,23 @@ const initializeGallery = async () => {
 
 // Appel de la fonction d'initialisation de la galerie
 initializeGallery();
+
+// Sélectionnez l'élément parent
+const modifyContainer = document.querySelector(".modify");
+
+// Fonction pour créer le bouton "modifier" dynamiquement
+const createModifyButton = () => {
+  // Créer le bouton "modifier"
+  const modifyButton = document.createElement("a");
+  modifyButton.textContent = "modifier";
+  modifyButton.classList.add("modal-trigger"); // Ajoutez les classes nécessaires à votre bouton
+
+  // Ajouter le bouton à l'élément parent
+  modifyContainer.appendChild(modifyButton);
+};
+
+// Appeler la fonction pour créer le bouton
+createModifyButton();
+
+// Ajoutez ici le reste de votre code JavaScript existant...
+// Par exemple, si vous avez déjà un événement click sur le bouton "Modifier", vous pouvez le conserver ici.
