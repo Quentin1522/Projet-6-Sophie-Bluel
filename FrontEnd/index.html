@@ -53,6 +53,7 @@
       <section id="portfolio">
         <div class="modify">
           <h2>Mes projets</h2>
+          <div class="modify-item"></div>
           <div class="modal-wrapper">
             <div class="overlay modal-trigger"></div>
             <div class="modal">
@@ -116,14 +117,17 @@
                             fill="#B9C5CC"
                           />
                         </svg>
-                        <input type="file" id="image" accept="image/*" />
+                        <label for="image" style="cursor: pointer">
+                          + Ajouter photo
+                          <input type="file" id="image" accept="image/*" />
+                        </label>
                         <p>jpg, png : 4mo max</p>
                       </div>
                       <form class="form-photo" action="#" method="POST">
-                        <label id="title">Titre</label>
+                        <label for="title">Titre</label>
                         <input type="text" id="title" />
-                        <label id="cate">Catégories</label>
-                        <select>
+                        <label id="categorie">Catégories</label>
+                        <select id="categorie">
                           <option></option>
                           <option>Objet</option>
                           <option>Appartements</option>
