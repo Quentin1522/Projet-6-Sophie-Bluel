@@ -194,3 +194,4 @@ document.addEventListener("DOMContentLoaded", function () {
   // Vérification initiale de l'état de connexion
   updateAuthenticationState();
 });
+////////

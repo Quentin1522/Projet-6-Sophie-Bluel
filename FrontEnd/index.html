@@ -119,11 +119,15 @@
                         </svg>
                         <label for="image" style="cursor: pointer">
                           + Ajouter photo
-                          <input type="file" id="image" accept="image/*" />
+                          <input type="file" id="image" />
                         </label>
                         <p>jpg, png : 4mo max</p>
                       </div>
-                      <form class="form-photo" action="#" method="POST">
+                      <form
+                        class="form-photo"
+                        action="./assets/script.js"
+                        method="POST"
+                      >
                         <label for="title">Titre</label>
                         <input type="text" id="title" />
                         <label for="categorie">Catégories</label>

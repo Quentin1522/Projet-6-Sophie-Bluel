@@ -95,7 +95,7 @@ const createModifyButton = () => {
   // Créer le bouton modifier
   const modifyButton = document.createElement("a");
   modifyButton.textContent = "modifier";
-  modifyButton.classList.add("modal-trigger"); // Ajoutez les classes nécessaires à votre bouton
+  modifyButton.classList.add("modal-trigger");
 
   // Créer le SVG
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -149,7 +149,6 @@ imageInput.addEventListener("input", () => {
     // Ajoutez l'élément img au conteneur-ajout
     conteneurAjout.appendChild(previewImage);
 
-    // Ajoutez une classe au bouton Valider pour changer la couleur
     validerButton.style.backgroundColor = "#1d6154";
     validerButton.style.color = "white";
   }
@@ -193,8 +192,12 @@ function toggleModal(e) {
 }
 
 // Fonction pour basculer l'état de la galerie photo
-function toggleGalleryModal(e) {
+function toggleGalleryModal() {
   galleryModal.classList.toggle("active");
+}
+// Mettre à jour la visibilité des boutons de suppression uniquement si la modal est active
+if (galleryModal.classList.contains("active")) {
+  updateDeleteButtons();
 }
 
 // Fonction pour basculer l'état de l'ajout de photo
@@ -227,6 +230,15 @@ arrowBtn.addEventListener("click", (e) => {
   toggleGalleryModal();
 });
 
+document.querySelectorAll(".close-modal").forEach((button) => {
+  button.addEventListener("click", function () {
+    // Assurez-vous que la galerie est bien fermée
+    galleryModal.classList.remove("active");
+    // Masquer les boutons de suppression puisque la modal est fermée
+    updateDeleteButtons();
+  });
+});
+
 // Fonction asynchrone pour récupérer les œuvres depuis l'API dans la modal
 const fetchWorks = async () => {
   try {
@@ -247,6 +259,7 @@ const fetchWorks = async () => {
   }
 };
 
+///////////////////////////////////
 // Fonction pour créer un élément dans la galerie
 const createGalleryItem = (work) => {
   const figure = document.createElement("figure");
@@ -259,8 +272,46 @@ const createGalleryItem = (work) => {
   figure.classList.add("itemGallery");
   figure.appendChild(img);
 
-  // Ajouter un événement pour afficher les détails au clic sur l'image
-  figure.addEventListener("click", () => {});
+  // Création du bouton de suppression
+  const deleteButton = document.createElement("button");
+  deleteButton.classList.add("delete-button");
+  deleteButton.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="9" height="11" viewBox="0 0 9 11" fill="none">
+      <path d="M2.71607 0.35558C2.82455 0.136607 3.04754 0 3.29063 0H5.70938C5.95246 0 6.17545 0.136607 6.28393 0.35558L6.42857 0.642857H8.35714C8.71272 0.642857 9 0.930134 9 1.28571C9 1.64129 8.71272 1.92857 8.35714 1.92857H0.642857C0.287277 1.92857 0 1.64129 0 1.28571C0 0.930134 0.287277 0.642857 0.642857 0.642857H2.57143L2.71607 0.35558ZM0.642857 2.57143H8.35714V9C8.35714 9.70915 7.78058 10.2857 7.07143 10.2857H1.92857C1.21942 10.2857 0.642857 9.70915 0.642857 9V2.57143ZM2.57143 3.85714C2.39464 3.85714 2.25 4.00179 2.25 4.17857V8.67857C2.25 8.85536 2.39464 9 2.57143 9C2.74821 9 2.89286 8.85536 2.89286 8.67857V4.17857C2.89286 4.00179 2.74821 3.85714 2.57143 3.85714ZM4.5 3.85714C4.32321 3.85714 4.17857 4.00179 4.17857 4.17857V8.67857C4.17857 8.85536 4.32321 9 4.5 9C4.67679 9 4.82143 8.85536 4.82143 8.67857V4.17857C4.82143 4.00179 4.67679 3.85714 4.5 3.85714ZM6.42857 3.85714C6.25179 3.85714 6.10714 4.00179 6.10714 4.17857V8.67857C6.10714 8.85536 6.25179 9 6.42857 9C6.60536 9 6.75 8.85536 6.75 8.67857V4.17857C6.75 4.00179 6.60536 3.85714 6.42857 3.85714Z" fill="white"/>
+    </svg>`;
+
+  // Ajout du gestionnaire d'événement pour le bouton de suppression
+  deleteButton.addEventListener("click", async (e) => {
+    e.stopPropagation(); // Empêcher le déclenchement de l'événement parent
+    if (confirm(`Êtes-vous sûr de vouloir supprimer "${work.title}" ?`)) {
+      try {
+        const response = await fetch(
+          `http://localhost:5678/api/works/${work.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Erreur lors de la suppression : ${response.statusText}`
+          );
+        }
+
+        // Suppression de l'élément du DOM
+        figure.remove();
+      } catch (error) {
+        console.error("Erreur lors de la suppression :", error);
+      }
+    }
+  });
+
+  // Ajout du bouton de suppression à l'élément figure
+  figure.appendChild(deleteButton);
+
   return figure;
 };
 
@@ -286,50 +337,163 @@ const initializeGalleryModal = async () => {
 
 // Appeler la fonction d'initialisation de la galerie
 document.addEventListener("DOMContentLoaded", initializeGalleryModal);
+//////////////////////////////////////////////////////////////////////////
+async function addWorkToGallery(event) {
+  event.preventDefault(); // Empêche le comportement par défaut du formulaire
 
-// Fonction pour ajouter un nouveau projet
-const submitNewWork = async (formData) => {
-  try {
-    const response = await fetch("http://localhost:5678/api/works", {
-      method: "POST",
-      body: formData,
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-    if (!response.ok) {
-      throw new Error(
-        `Erreur lors de l'ajout du projet. Code HTTP : ${response.status}`
-      );
+  // Récupère le token du localStorage
+  const token = localStorage.getItem("token");
+
+  // Récupérer l'image sélectionnée
+  const selectedImage = imageInput.files[0];
+  // Récupérer le titre
+  const title = document.getElementById("title").value;
+  // Récupérer l'ID de la catégorie, converti en entier
+  const categoryId = parseInt(document.getElementById("categorie").value);
+
+  // Afficher les valeurs pour le débogage
+  console.log("Image sélectionnée: ", selectedImage);
+  console.log("Titre: ", title);
+  console.log("Catégorie ID: ", categoryId);
+  console.log("Token: ", token);
+  console.log(addWorkToGallery);
+
+  // Vérifier si toutes les données nécessaires sont présentes
+  if (selectedImage && title && !isNaN(categoryId) && token) {
+    // Créer un FormData qui contiendra les fichiers et les autres champs du formulaire
+    const formData = new FormData();
+    formData.append("image", selectedImage); // Ajouter l'image au FormData
+    formData.append("title", title); // Ajouter le titre au FormData
+    formData.append("categoryId", categoryId); // Ajouter l'id de la catégorie au FormData
+
+    try {
+      // Effectuer la requête HTTP POST pour envoyer le FormData à l'API
+      const response = await fetch("http://localhost:5678/api/works", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+        body: formData,
+      });
+
+      const newWork = await response.json();
+      console.log(newWork);
+
+      // Vérifier que la réponse est valide
+      if (response.ok) {
+        // Le code pour traiter la réponse et mettre à jour la galerie...
+      } else {
+        throw new Error(`Erreur: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'ajout du nouveau projet:", error);
     }
-    return await response.json();
-  } catch (error) {
-    console.error("Erreur lors de l'ajout du projet à l'API :", error);
-    throw error;
   }
-};
+}
 
-// Fonction pour gérer la soumission du formulaire
-const handleFormSubmit = async (e) => {
-  e.preventDefault();
+// Attachez cette fonction à l'événement 'submit' du formulaire de la deuxième modal
+formPhoto.addEventListener("submit", addWorkToGallery);
+//////////////////////////////////////////////////////////
+//Affichage des bouttons login/lougout
+const editButton = document.getElementById("editButton"); // Bouton de modification
+const iconSvg = document.getElementById("iconSvg"); // Icône SVG
 
-  // Créer un objet FormData basé sur les champs du formulaire
-  const formData = new FormData(formPhoto);
+function updateUI() {
+  const loginLI = document.getElementById("loginLI"); // L'élément <li> pour le bouton de connexion/déconnexion
 
-  try {
-    // Soumission du formulaire et récupération des données du projet ajouté
-    const newWork = await submitNewWork(formData);
+  if (isLoggedIn()) {
+    loginLI.textContent = "logout";
+    loginLI.removeEventListener("click", redirectToLoginPage);
+    loginLI.addEventListener("click", logout);
+    // Afficher le bouton de modification et l'icône
+    if (editButton) editButton.style.display = "inline";
+    if (iconSvg) iconSvg.style.display = "inline";
+  } else {
+    // Modifier le texte pour afficher "Login"
+    loginLI.textContent = "login";
+    loginLI.removeEventListener("click", logout);
+    loginLI.addEventListener("click", redirectToLoginPage);
 
-    // Ajout à la liste des œuvres en mémoire et rafraichissement de la galerie
-    works.push(newWork);
-    displayWorks(works);
-
-    // Ferme la boîte modale de l'ajout de photo
-    toggleAddPhotoModal();
-  } catch (error) {
-    console.error("Erreur lors de la gestion du formulaire :", error);
+    // Masquer le bouton de modification et l'icône
+    if (editButton) editButton.style.display = "none";
+    if (iconSvg) iconSvg.style.display = "none";
   }
-};
+}
 
-// Attache le gestionnaire d'événements de soumission du formulaire
-formPhoto.addEventListener("submit", handleFormSubmit);
+// Créer le bouton login/logout et l'ajouter à la navigation
+function createLoginLogoutButton() {
+  const loginLI = document.createElement("li");
+  loginLI.id = "loginLI";
+
+  // Insérer le bouton avant le dernier élément de 'navList' si 'navList' a plus d'un enfant
+  if (navList.children.length > 1) {
+    // L'avant-dernier emplacement est juste avant le dernier enfant
+    const lastLi = navList.lastElementChild;
+    navList.insertBefore(loginLI, lastLi);
+  } else {
+    // S'il n'y a qu'un seul enfant ou aucun, simplement ajouter à la fin
+    navList.append(loginLI);
+  }
+
+  updateUI(); // Mettre à jour l'état immédiatement après la création
+}
+//////////
+// Fonction pour ouvrir une modal spécifique
+function openModal(modal) {
+  modal.classList.add("active");
+  updateDeleteIconsVisibility("visible"); // Rendre les icônes de suppression visibles
+}
+
+// Fonction pour fermer une modal spécifique
+function closeModal(modal) {
+  modal.classList.remove("active");
+  updateDeleteIconsVisibility("hidden"); // Masquer les icônes de suppression
+}
+
+// Mise à jour de la visibilité des icônes de suppression
+function updateDeleteIconsVisibility(visibility) {
+  document.querySelectorAll(".delete-button").forEach((button) => {
+    button.style.visibility = visibility;
+  });
+}
+
+// Attacher les gestionnaires d'événements à ouvrir/fermer les modals
+document.addEventListener("DOMContentLoaded", () => {
+  modalTriggers.forEach((trigger) => {
+    trigger.addEventListener("click", (e) => toggleModal(modalWrapper));
+  });
+
+  photoTriggers.forEach((trigger) => {
+    trigger.addEventListener("click", () => toggleModal(galleryModal));
+  });
+
+  // Fermer les modals si les boutons de fermeture sont cliqués
+  document.querySelectorAll(".close-modal").forEach((button) => {
+    button.addEventListener("click", () => {
+      closeModal(galleryModal);
+      closeModal(modalWrapper);
+    });
+  });
+});
+
+// Fonction pour basculer entre ouvrir et fermer une modal
+function toggleModal(modal) {
+  if (modal && modal.classList && modal.classList.contains("active")) {
+    modal.classList.remove("active");
+    updateDeleteIconsVisibility("hidden"); // Masquer les icônes de suppression
+  } else if (modal && modal.classList) {
+    modal.classList.add("active");
+    updateDeleteIconsVisibility("visible"); // Rendre les icônes de suppression visibles
+  }
+
+  // Vérifier si modal existe et possède la propriété classList
+  if (modal && modal.classList) {
+    // Sélectionnez les icônes de suppression à l'intérieur de la modal
+    const deleteIcons = modal.querySelectorAll(".delete-button svg");
+
+    // Parcourez chaque icône et ajoutez ou supprimez la classe pour modifier la visibilité
+    deleteIcons.forEach((icon) => {
+      icon.classList.toggle("visible");
+    });
+  }
+}
