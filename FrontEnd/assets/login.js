@@ -22,11 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     else window.location.href = "../index.html";
   }
 
-  function redirectToLogianPage() {
-    window.location.href = "assets/login.html";
-  }
-
-  // Fonction pour vérifier si l'utilsateur est connecté
+  // Fonction pour vérifier si l'utilisateur est connecté
   function isLoggedIn() {
     return !!localStorage.getItem("token");
   }
@@ -71,14 +67,14 @@ document.addEventListener("DOMContentLoaded", function () {
     updateUI(); // Mettre à jour l'état immédiatement après la création
   }
 
-  // Gestionnaire d'événement pour la soumission du formulaire
+  // Gestionnaire d'événement pour la soumission du formulaire de connexion
   function handleLoginSubmit(event) {
     event.preventDefault();
     const emailInput = document.getElementById("email"); // Assurez-vous que l'ID est correct dans le HTML
     const passwordInput = document.getElementById("password"); // Assurez-vous que l'ID est correct dans le HTML
 
-    const email = emailInput.value.trim(); // Ligne susceptible de générer l'erreur
-    const password = passwordInput.value.trim(); // Ligne susceptible de générer l'erreur
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
     fetch("http://localhost:5678/api/users/login", {
       method: "POST",
@@ -111,87 +107,3 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialiser le bouton de connexion/déconnexion à partir de l'état de stockage local
   createLoginLogoutButton();
 });
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Récupération de l'état de connexion
-  const updateAuthenticationState = () => {
-    const isAuthenticated = isLoggedIn();
-    displayEditOptions(isAuthenticated);
-    displayAuthenticationButton(isAuthenticated);
-  };
-
-  const displayEditOptions = (isAuthenticated) => {
-    const editElements = document.getElementsByClassName("edit");
-    for (const element of editElements) {
-      element.style.display = isAuthenticated ? "inline" : "none";
-    }
-  };
-
-  const displayAuthenticationButton = (isAuthenticated) => {
-    const loginButton = document.getElementById("loginButton");
-    const logoutButton = document.getElementById("logoutButton");
-
-    if (isAuthenticated) {
-      loginButton.style.display = "none";
-      logoutButton.style.display = "inline";
-    } else {
-      loginButton.style.display = "inline";
-      logoutButton.style.display = "none";
-    }
-  };
-
-  const isLoggedIn = () => {
-    return !!localStorage.getItem("token");
-  };
-
-  const loginForm = document.getElementById("loginForm");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-
-  // Écouteur d'événement pour la soumission du formulaire de connexion
-  loginForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const email = email.value;
-    const password = passwordInput.value;
-
-    // Supposons que l'API retourne un objet avec un token en cas de succès
-    fetch("http://localhost:5678/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok " + response.statusText);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // Sauvegarde du token dans le localStorage
-        localStorage.setItem("token", data.token);
-        updateAuthenticationState();
-        // Redirection vers la page principale
-        window.location.href = "index.html";
-      })
-      .catch((error) => {
-        console.error(
-          "There has been a problem with your fetch operation:",
-          error
-        );
-      });
-  });
-
-  // Écouteur d'événement pour le bouton de déconnexion
-  document.getElementById("logoutButton").addEventListener("click", () => {
-    localStorage.removeItem("token");
-    updateAuthenticationState();
-    // Redirection vers la page de connexion
-    window.location.href = "login.html";
-  });
-
-  // Vérification initiale de l'état de connexion
-  updateAuthenticationState();
-});
-////////
