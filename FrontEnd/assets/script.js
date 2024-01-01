@@ -235,7 +235,6 @@ document.querySelectorAll(".close-modal").forEach((button) => {
     // Assurez-vous que la galerie est bien fermée
     galleryModal.classList.remove("active");
     // Masquer les boutons de suppression puisque la modal est fermée
-    updateDeleteButtons();
   });
 });
 
@@ -337,7 +336,7 @@ const initializeGalleryModal = async () => {
 
 // Appeler la fonction d'initialisation de la galerie
 document.addEventListener("DOMContentLoaded", initializeGalleryModal);
-//////////////////////////////////////////////////////////////////////////
+////////////////////////ENVOIE//////////////////////////////////////////////////
 async function addWorkToGallery(event) {
   event.preventDefault(); // Empêche le comportement par défaut du formulaire
 
@@ -349,35 +348,36 @@ async function addWorkToGallery(event) {
   // Récupérer le titre
   const title = document.getElementById("title").value;
   // Récupérer l'ID de la catégorie, converti en entier
-  const categoryId = parseInt(document.getElementById("categorie").value);
+  const category = parseInt(document.getElementById("categorie").value);
+
+  console.log(category);
 
   // Afficher les valeurs pour le débogage
   console.log("Image sélectionnée: ", selectedImage);
   console.log("Titre: ", title);
-  console.log("Catégorie ID: ", categoryId);
+  console.log("Categorie: ", category);
   console.log("Token: ", token);
-  console.log(addWorkToGallery);
 
   // Vérifier si toutes les données nécessaires sont présentes
-  if (selectedImage && title && !isNaN(categoryId) && token) {
+  if (selectedImage && title && !isNaN(category) && token) {
     // Créer un FormData qui contiendra les fichiers et les autres champs du formulaire
     const formData = new FormData();
     formData.append("image", selectedImage); // Ajouter l'image au FormData
     formData.append("title", title); // Ajouter le titre au FormData
-    formData.append("categoryId", categoryId); // Ajouter l'id de la catégorie au FormData
+    formData.append("category", category); // Ajouter l'id de la catégorie au FormData/
 
     try {
       // Effectuer la requête HTTP POST pour envoyer le FormData à l'API
       const response = await fetch("http://localhost:5678/api/works", {
         method: "POST",
         headers: {
-          Authorization: "Bearer " + token,
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
         body: formData,
       });
 
-      const newWork = await response.json();
-      console.log(newWork);
+      const data = await response.json();
+      console.log(data);
 
       // Vérifier que la réponse est valide
       if (response.ok) {
@@ -391,52 +391,9 @@ async function addWorkToGallery(event) {
   }
 }
 
-// Attachez cette fonction à l'événement 'submit' du formulaire de la deuxième modal
-formPhoto.addEventListener("submit", addWorkToGallery);
-//////////////////////////////////////////////////////////
-//Affichage des bouttons login/lougout
-const editButton = document.getElementById("editButton"); // Bouton de modification
-const iconSvg = document.getElementById("iconSvg"); // Icône SVG
+console.error;
+////////////////////////ENVOIE//////////////////////////////////
 
-function updateUI() {
-  const loginLI = document.getElementById("loginLI"); // L'élément <li> pour le bouton de connexion/déconnexion
-
-  if (isLoggedIn()) {
-    loginLI.textContent = "logout";
-    loginLI.removeEventListener("click", redirectToLoginPage);
-    loginLI.addEventListener("click", logout);
-    // Afficher le bouton de modification et l'icône
-    if (editButton) editButton.style.display = "inline";
-    if (iconSvg) iconSvg.style.display = "inline";
-  } else {
-    // Modifier le texte pour afficher "Login"
-    loginLI.textContent = "login";
-    loginLI.removeEventListener("click", logout);
-    loginLI.addEventListener("click", redirectToLoginPage);
-
-    // Masquer le bouton de modification et l'icône
-    if (editButton) editButton.style.display = "none";
-    if (iconSvg) iconSvg.style.display = "none";
-  }
-}
-
-// Créer le bouton login/logout et l'ajouter à la navigation
-function createLoginLogoutButton() {
-  const loginLI = document.createElement("li");
-  loginLI.id = "loginLI";
-
-  // Insérer le bouton avant le dernier élément de 'navList' si 'navList' a plus d'un enfant
-  if (navList.children.length > 1) {
-    // L'avant-dernier emplacement est juste avant le dernier enfant
-    const lastLi = navList.lastElementChild;
-    navList.insertBefore(loginLI, lastLi);
-  } else {
-    // S'il n'y a qu'un seul enfant ou aucun, simplement ajouter à la fin
-    navList.append(loginLI);
-  }
-
-  updateUI(); // Mettre à jour l'état immédiatement après la création
-}
 //////////
 // Fonction pour ouvrir une modal spécifique
 function openModal(modal) {
@@ -497,3 +454,5 @@ function toggleModal(modal) {
     });
   }
 }
+
+////////////////:

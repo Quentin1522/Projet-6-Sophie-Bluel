@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     else window.location.href = "../index.html";
   }
 
-  function redirectToLoginPage() {
+  function redirectToLogianPage() {
     window.location.href = "assets/login.html";
   }
 

@@ -124,18 +124,19 @@
                         <p>jpg, png : 4mo max</p>
                       </div>
                       <form
+                        onsubmit="addWorkToGallery(event)"
                         class="form-photo"
-                        action="./assets/script.js"
+                        action="http://localhost:5678/api/works"
                         method="POST"
                       >
                         <label for="title">Titre</label>
                         <input type="text" id="title" />
                         <label for="categorie">Catégories</label>
-                        <select id="categorie">
+                        <select id="categorie" name="categorie">
                           <option></option>
-                          <option>Objet</option>
-                          <option>Appartements</option>
-                          <option>Hotels & Restaurants</option>
+                          <option value="1">Objet</option>
+                          <option value="2">Appartements</option>
+                          <option value="3">Hotels & Restaurants</option>
                         </select>
                         <hr />
                         <input
