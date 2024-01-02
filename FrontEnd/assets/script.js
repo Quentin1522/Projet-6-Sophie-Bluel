@@ -4,11 +4,11 @@ const filters = document.querySelector(".filters");
 
 // Fonction asynchrone pour effectuer une requête API et récupérer les œuvres
 const getApi = async () =>
-  await (await fetch("http://localhost:5678/api/works")).json();
+  (await fetch("http://localhost:5678/api/works")).json();
 
 // Fonction asynchrone pour effectuer une requête API et récupérer les catégories
 const getCategories = async () =>
-  await (await fetch("http://localhost:5678/api/categories")).json();
+  (await fetch("http://localhost:5678/api/categories")).json();
 
 // Fonction pour créer un élément dans la galerie
 const displayApi = (api) => {
