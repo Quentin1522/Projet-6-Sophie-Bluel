@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const editButton = document.getElementById("editButton"); // Bouton de modification
   const iconSvg = document.getElementById("iconSvg"); // Icône SVG
   const navList = document.querySelector("nav ul"); // Liste de navigation où les liens sont ajoutés
+  const bandeau = document.getElementById("bandeau"); //Bandeau
 
   // Fonction de gestionnaire de redirection vers la page login.html
   function redirectToLoginPage() {
@@ -37,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Afficher le bouton de modification et l'icône
       if (editButton) editButton.style.display = "inline";
       if (iconSvg) iconSvg.style.display = "inline";
+      if (bandeau) bandeau.style.display = "block";
     } else {
       // Modifier le texte pour afficher "Login"
       loginLI.textContent = "login";
@@ -46,6 +48,9 @@ document.addEventListener("DOMContentLoaded", function () {
       // Masquer le bouton de modification et l'icône
       if (editButton) editButton.style.display = "none";
       if (iconSvg) iconSvg.style.display = "none";
+      if (bandeau) bandeau.style.display = "none";
+
+      //Masquer le bandeau
     }
   }
 
@@ -94,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => {
         console.error("Login failed:", error);
-        alert("Login failed. Please try again.");
+        alert("Erreur dans l’identifiant ou le mot de passe.");
       });
   }
 

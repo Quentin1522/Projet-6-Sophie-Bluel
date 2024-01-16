@@ -5,11 +5,9 @@ const filters = document.querySelector(".filters");
 // Fonction asynchrone pour effectuer une requête API et récupérer les œuvres
 const getApi = async () =>
   (await fetch("http://localhost:5678/api/works")).json();
-
 // Fonction asynchrone pour effectuer une requête API et récupérer les catégories
 const getCategories = async () =>
   (await fetch("http://localhost:5678/api/categories")).json();
-
 // Fonction pour créer un élément dans la galerie
 const displayApi = (api) => {
   const figure = document.createElement("figure");
@@ -72,10 +70,19 @@ const filterByCategory = async () => {
 
       // Afficher les œuvres filtrées dans la galerie
       displayApis(filteredGallery);
+
+      // Changer la couleur du bouton cliqué
+      buttons.forEach((button) => {
+        button.style.backgroundColor = "#ffffff";
+        button.style.color = "#1D6154";
+      });
+      e.target.style.backgroundColor = "#1D6154";
+      e.target.style.color = "#ffffff";
     });
   });
 };
 
+///////////////////////////////////////////////////////////
 // Fonction asynchrone pour initialiser la galerie
 const initializeGallery = async () => {
   // Créer les boutons de catégorie
@@ -136,6 +143,18 @@ imageInput.addEventListener("input", () => {
     // Récupérez le fichier sélectionné
     const selectedImage = imageInput.files[0];
 
+    // Vérifie la taille du fichier (en octets)
+    const maxSizeInBytes = 4 * 1024 * 1024; // 4 Mo
+    if (selectedImage.size > maxSizeInBytes) {
+      //Sélection de l'élément qui sert à afficher le message d'erreur
+      const errorElement = document.getElementById("error-message");
+      errorElement.textContent =
+        "La taille de l'image ne doit pas dépasser 4 Mo.";
+      // Réinitialisez l'input pour effacer la sélection
+      imageInput.value = "";
+      return;
+    }
+
     // Créez un objet URL pour l'image sélectionnée
     const imageURL = URL.createObjectURL(selectedImage);
 
@@ -148,7 +167,6 @@ imageInput.addEventListener("input", () => {
 
     // Ajoutez l'élément img au conteneur-ajout
     conteneurAjout.appendChild(previewImage);
-
     validerButton.style.backgroundColor = "#1d6154";
     validerButton.style.color = "white";
   }
@@ -274,14 +292,32 @@ const createGalleryItem = (work) => {
   // Création du bouton de suppression
   const deleteButton = document.createElement("button");
   deleteButton.classList.add("delete-button");
-  deleteButton.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="9" height="11" viewBox="0 0 9 11" fill="none">
-      <path d="M2.71607 0.35558C2.82455 0.136607 3.04754 0 3.29063 0H5.70938C5.95246 0 6.17545 0.136607 6.28393 0.35558L6.42857 0.642857H8.35714C8.71272 0.642857 9 0.930134 9 1.28571C9 1.64129 8.71272 1.92857 8.35714 1.92857H0.642857C0.287277 1.92857 0 1.64129 0 1.28571C0 0.930134 0.287277 0.642857 0.642857 0.642857H2.57143L2.71607 0.35558ZM0.642857 2.57143H8.35714V9C8.35714 9.70915 7.78058 10.2857 7.07143 10.2857H1.92857C1.21942 10.2857 0.642857 9.70915 0.642857 9V2.57143ZM2.57143 3.85714C2.39464 3.85714 2.25 4.00179 2.25 4.17857V8.67857C2.25 8.85536 2.39464 9 2.57143 9C2.74821 9 2.89286 8.85536 2.89286 8.67857V4.17857C2.89286 4.00179 2.74821 3.85714 2.57143 3.85714ZM4.5 3.85714C4.32321 3.85714 4.17857 4.00179 4.17857 4.17857V8.67857C4.17857 8.85536 4.32321 9 4.5 9C4.67679 9 4.82143 8.85536 4.82143 8.67857V4.17857C4.82143 4.00179 4.67679 3.85714 4.5 3.85714ZM6.42857 3.85714C6.25179 3.85714 6.10714 4.00179 6.10714 4.17857V8.67857C6.10714 8.85536 6.25179 9 6.42857 9C6.60536 9 6.75 8.85536 6.75 8.67857V4.17857C6.75 4.00179 6.60536 3.85714 6.42857 3.85714Z" fill="white"/>
-    </svg>`;
+
+  // Création du SVG trash
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  svg.setAttribute("width", "9");
+  svg.setAttribute("height", "11");
+  svg.setAttribute("viewBox", "0 0 9 11");
+  svg.setAttribute("fill", "none");
+
+  // Création du chemin du SVG
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute(
+    "d",
+    "M2.71607 0.35558C2.82455 0.136607 3.04754 0 3.29063 0H5.70938C5.95246 0 6.17545 0.136607 6.28393 0.35558L6.42857 0.642857H8.35714C8.71272 0.642857 9 0.930134 9 1.28571C9 1.64129 8.71272 1.92857 8.35714 1.92857H0.642857C0.287277 1.92857 0 1.64129 0 1.28571C0 0.930134 0.287277 0.642857 0.642857 0.642857H2.57143L2.71607 0.35558ZM0.642857 2.57143H8.35714V9C8.35714 9.70915 7.78058 10.2857 7.07143 10.2857H1.92857C1.21942 10.2857 0.642857 9.70915 0.642857 9V2.57143ZM2.57143 3.85714C2.39464 3.85714 2.25 4.00179 2.25 4.17857V8.67857C2.25 8.85536 2.39464 9 2.57143 9C2.74821 9 2.89286 8.85536 2.89286 8.67857V4.17857C2.89286 4.00179 2.74821 3.85714 2.57143 3.85714ZM4.5 3.85714C4.32321 3.85714 4.17857 4.00179 4.17857 4.17857V8.67857C4.17857 8.85536 4.32321 9 4.5 9C4.67679 9 4.82143 8.85536 4.82143 8.67857V4.17857C4.82143 4.00179 4.67679 3.85714 4.5 3.85714ZM6.42857 3.85714C6.25179 3.85714 6.10714 4.00179 6.10714 4.17857V8.67857C6.10714 8.85536 6.25179 9 6.42857 9C6.60536 9 6.75 8.85536 6.75 8.67857V4.17857C6.75 4.00179 6.60536 3.85714 6.42857 3.85714Z"
+  );
+  path.setAttribute("fill", "white");
+
+  // Ajout du chemin au SVG
+  svg.appendChild(path);
+
+  // Ajout du SVG au bouton de suppression
+  deleteButton.appendChild(svg);
 
   // Ajout du gestionnaire d'événement pour le bouton de suppression
-  deleteButton.addEventListener("click", async (e) => {
-    e.stopPropagation(); // Empêcher le déclenchement de l'événement parent
+  deleteButton.addEventListener("click", async (event) => {
+    event.preventDefault();
     if (confirm(`Êtes-vous sûr de vouloir supprimer "${work.title}" ?`)) {
       try {
         const response = await fetch(
@@ -293,7 +329,6 @@ const createGalleryItem = (work) => {
             },
           }
         );
-
         if (!response.ok) {
           throw new Error(
             `Erreur lors de la suppression : ${response.statusText}`
@@ -316,7 +351,6 @@ const createGalleryItem = (work) => {
 
 // Fonction pour afficher les œuvres dans la galerie
 const displayWorks = (works) => {
-  console.log(works);
   galleryModal.innerHTML = ""; // Vide la galerie
   works.forEach((work) => {
     const galleryItem = createGalleryItem(work);
@@ -337,71 +371,99 @@ const initializeGalleryModal = async () => {
 // Appeler la fonction d'initialisation de la galerie
 document.addEventListener("DOMContentLoaded", initializeGalleryModal);
 ////////////////////////ENVOIE//////////////////////////////////////////////////
+document.addEventListener("DOMContentLoaded", () => {
+  const addWorkForm = document.getElementById("addWorkForm");
+  if (addWorkForm) {
+    addWorkForm.addEventListener("submit", addWorkToGallery);
+  } else {
+    console.error("Le formulaire est introuvable dans le DOM.");
+  }
+});
+
 async function addWorkToGallery(event) {
   event.preventDefault(); // Empêche le comportement par défaut du formulaire
 
-  // Récupère le token du localStorage
+  // Récupération du token d'authentification
   const token = localStorage.getItem("token");
+  if (!token) {
+    console.error("Vous devez être connecté pour effectuer cette action.");
+    return;
+  }
+  // Récupération des éléments du formulaire
 
-  // Récupérer l'image sélectionnée
+  const titleInput = document.getElementById("title");
+  const categorySelect = document.getElementById("categorie");
+  if (
+    imageInput.value.trim() === "" ||
+    titleInput.value.trim() === "" ||
+    categorySelect.value.trim() === ""
+  ) {
+    const errorElementChamp = document.getElementById("error-messageChamp");
+    errorElementChamp.textContent =
+      "Certains champs du formulaire ne sont pas remplis";
+    return;
+  }
+
+  // Récupération des valeurs des champs
   const selectedImage = imageInput.files[0];
-  // Récupérer le titre
-  const title = document.getElementById("title").value;
-  // Récupérer l'ID de la catégorie, converti en entier
-  const category = parseInt(document.getElementById("categorie").value);
+  const title = titleInput.value.trim();
+  const category = parseInt(categorySelect.value, 10);
 
-  console.log(category);
+  // Création de l'objet FormData pour contenir les champs du formulaire
+  const formData = new FormData();
+  formData.append("image", selectedImage);
+  formData.append("title", title);
+  formData.append("category", category);
 
-  // Afficher les valeurs pour le débogage
-  console.log("Image sélectionnée: ", selectedImage);
-  console.log("Titre: ", title);
-  console.log("Categorie: ", category);
-  console.log("Token: ", token);
-
-  // Vérifier si toutes les données nécessaires sont présentes
-  if (selectedImage && title && !isNaN(category) && token) {
-    // Créer un FormData qui contiendra les fichiers et les autres champs du formulaire
-    const formData = new FormData();
-    formData.append("image", selectedImage); // Ajouter l'image au FormData
-    formData.append("title", title); // Ajouter le titre au FormData
-    formData.append("category", category); // Ajouter l'id de la catégorie au FormData/
-
-    try {
-      // Effectuer la requête HTTP POST pour envoyer le FormData à l'API
-      const response = await fetch("http://localhost:5678/api/works", {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-        body: formData,
-      });
-
+  try {
+    // Envoi de la requête avec le token dans l'entête Authorization
+    const response = await fetch("http://localhost:5678/api/works", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: formData,
+    });
+    if (response.ok) {
       const data = await response.json();
-      console.log(data);
-
-      // Vérifier que la réponse est valide
-      if (response.ok) {
-        // Le code pour traiter la réponse et mettre à jour la galerie...
-      } else {
-        throw new Error(`Erreur: ${response.statusText}`);
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'ajout du nouveau projet:", error);
+      // Mettre à jour l'UI ou rediriger l'utilisateur
+    } else {
+      // Récupérer plus d'informations sur l'erreur
+      const errorData = await response.json();
+      throw new Error(`Erreur: ${response.statusText}` || errorData.message);
     }
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de l'œuvre:", error);
   }
 }
 
-console.error;
-////////////////////////ENVOIE//////////////////////////////////
+/////////////////////////Categories dynamique////////////////////
+// Utilisez la fonction getCategories pour récupérer les catégories
+getCategories()
+  .then((categories) => {
+    const categorieSelect = document.getElementById("categorie");
+
+    categories.forEach((category) => {
+      const optionElement = document.createElement("option");
+      optionElement.value = category.id;
+      optionElement.textContent = category.name;
+      categorieSelect.appendChild(optionElement);
+    });
+  })
+  .catch((error) => {
+    console.error(error); // Affichez les erreurs éventuelles dans la console
+  });
+
+////////////////////////ENVOIE fin//////////////////////////////////
 
 //////////
-// Fonction pour ouvrir une modal spécifique
+// Fonction pour ouvrir une modal
 function openModal(modal) {
   modal.classList.add("active");
   updateDeleteIconsVisibility("visible"); // Rendre les icônes de suppression visibles
 }
 
-// Fonction pour fermer une modal spécifique
+// Fonction pour fermer une modal
 function closeModal(modal) {
   modal.classList.remove("active");
   updateDeleteIconsVisibility("hidden"); // Masquer les icônes de suppression
@@ -455,4 +517,4 @@ function toggleModal(modal) {
   }
 }
 
-////////////////:
+////////////////

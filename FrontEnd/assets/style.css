@@ -134,6 +134,7 @@ body {
   font-family: "Work Sans";
   font-size: 14px;
 }
+
 header {
   display: flex;
   justify-content: space-between;
@@ -163,7 +164,7 @@ h2 {
   font-weight: 700;
   font-size: 30px;
   color: #1d6154;
-  margin-right: 20px;
+  /* margin-right: 20px;/*/
 }
 
 nav ul {
@@ -202,6 +203,7 @@ li:hover {
 #introduction p {
   margin-bottom: 0.5em;
 }
+
 #portfolio h2 {
   text-align: center;
   margin-bottom: 1em;
@@ -223,9 +225,9 @@ li:hover {
   background-color: #ffffff;
 }
 
-.filters button:hover {
-  color: #ffffff;
+.filters button.active {
   background-color: #1d6154;
+  color: #ffffff;
 }
 
 #gallery {
@@ -305,7 +307,6 @@ footer nav ul {
 .modify {
   display: flex;
   justify-content: center;
-  margin-left: 85px;
   align-items: baseline;
 }
 
@@ -350,7 +351,6 @@ footer nav ul {
 }
 
 .overlay {
-  position: absolute;
   width: 100%;
   height: 100%;
   background-color: #333333d3;
@@ -528,4 +528,31 @@ hr {
   position: relative;
   left: 15px;
   top: -93px;
+}
+
+.delete-button svg {
+  padding: 3px 0;
+}
+
+#bandeau {
+  background-color: #000;
+  width: 100%;
+  height: 60px;
+  color: #fff;
+}
+
+.bandeau-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 30px;
+}
+
+.bandeau-content p {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+#error-messageChamp {
+  text-align: center;
 }
