@@ -437,6 +437,8 @@ async function addWorkToGallery(event) {
   }
 }
 
+////////////////////////ENVOIE fin//////////////////////////////////
+
 /////////////////////////Categories dynamique////////////////////
 // Utilisez la fonction getCategories pour récupérer les catégories
 getCategories()
@@ -453,8 +455,6 @@ getCategories()
   .catch((error) => {
     console.error(error); // Affichez les erreurs éventuelles dans la console
   });
-
-////////////////////////ENVOIE fin//////////////////////////////////
 
 //////////
 // Fonction pour ouvrir une modal
