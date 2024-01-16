@@ -75,8 +75,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Gestionnaire d'événement pour la soumission du formulaire de connexion
   function handleLoginSubmit(event) {
     event.preventDefault();
-    const emailInput = document.getElementById("email"); // Assurez-vous que l'ID est correct dans le HTML
-    const passwordInput = document.getElementById("password"); // Assurez-vous que l'ID est correct dans le HTML
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
 
     const email = emailInput.value.trim();
     const password = passwordInput.value.trim();
