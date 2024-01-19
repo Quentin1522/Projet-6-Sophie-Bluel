@@ -516,5 +516,4 @@ function toggleModal(modal) {
     });
   }
 }
-
 ////////////////
