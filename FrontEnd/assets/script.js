@@ -5,6 +5,7 @@ const filters = document.querySelector(".filters");
 // Fonction asynchrone pour effectuer une requête API et récupérer les œuvres
 const getApi = async () =>
   (await fetch("http://localhost:5678/api/works")).json();
+
 // Fonction asynchrone pour effectuer une requête API et récupérer les catégories
 const getCategories = async () =>
   (await fetch("http://localhost:5678/api/categories")).json();
@@ -255,27 +256,6 @@ document.querySelectorAll(".close-modal").forEach((button) => {
     // Masquer les boutons de suppression puisque la modal est fermée
   });
 });
-
-// Fonction asynchrone pour récupérer les œuvres depuis l'API dans la modal
-const fetchWorks = async () => {
-  try {
-    const response = await fetch("http://localhost:5678/api/works");
-    if (!response.ok) {
-      throw new Error(
-        `Erreur de chargement des œuvres. Code HTTP : ${response.status}`
-      );
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des données de l'API :",
-      error
-    );
-    throw error;
-  }
-};
-
 ///////////////////////////////////
 // Fonction pour créer un élément dans la galerie
 const createGalleryItem = (work) => {
@@ -291,6 +271,7 @@ const createGalleryItem = (work) => {
 
   // Création du bouton de suppression
   const deleteButton = document.createElement("button");
+  deleteButton.type = "button"; //pour éviter la soumission du formulaire
   deleteButton.classList.add("delete-button");
 
   // Création du SVG trash
@@ -335,6 +316,14 @@ const createGalleryItem = (work) => {
           );
         }
 
+        // Suppression de l'œuvre du localStorage
+        let works = JSON.parse(localStorage.getItem("works"));
+        works = works.filter((storedWork) => storedWork.id !== work.id);
+        localStorage.setItem("works", JSON.stringify(works));
+
+        // Mise à jour de la galerie
+        displayWorks(works);
+
         // Suppression de l'élément du DOM
         figure.remove();
       } catch (error) {
@@ -342,7 +331,6 @@ const createGalleryItem = (work) => {
       }
     }
   });
-
   // Ajout du bouton de suppression à l'élément figure
   figure.appendChild(deleteButton);
 
@@ -351,7 +339,7 @@ const createGalleryItem = (work) => {
 
 // Fonction pour afficher les œuvres dans la galerie
 const displayWorks = (works) => {
-  galleryModal.innerHTML = ""; // Vide la galerie
+  galleryModal.innerHTML = ""; // Vide la galerie avant d'ajouter de nouveaux éléments
   works.forEach((work) => {
     const galleryItem = createGalleryItem(work);
     galleryModal.appendChild(galleryItem);
@@ -371,6 +359,30 @@ const initializeGalleryModal = async () => {
 // Appeler la fonction d'initialisation de la galerie
 document.addEventListener("DOMContentLoaded", initializeGalleryModal);
 ////////////////////////ENVOIE//////////////////////////////////////////////////
+// Fonction asynchrone pour récupérer les œuvres depuis l'API dans la modal
+const fetchWorks = async () => {
+  try {
+    const response = await fetch("http://localhost:5678/api/works");
+    if (!response.ok) {
+      throw new Error(
+        `Erreur de chargement des œuvres. Code HTTP : ${response.status}`
+      );
+    }
+    const data = await response.json();
+
+    // Stocker les œuvres récupérées dans le localStorage
+    localStorage.setItem("works", JSON.stringify(data));
+
+    return data;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des données de l'API :",
+      error
+    );
+    throw error;
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   const addWorkForm = document.getElementById("addWorkForm");
   if (addWorkForm) {
@@ -383,59 +395,108 @@ document.addEventListener("DOMContentLoaded", () => {
 async function addWorkToGallery(event) {
   event.preventDefault(); // Empêche le comportement par défaut du formulaire
 
-  // Récupération du token d'authentification
+  // Récupération du token d'authentification (si nécessaire pour l'API)
   const token = localStorage.getItem("token");
   if (!token) {
     console.error("Vous devez être connecté pour effectuer cette action.");
     return;
   }
-  // Récupération des éléments du formulaire
 
+  // Récupération des éléments et des valeurs du formulaire
   const titleInput = document.getElementById("title");
   const categorySelect = document.getElementById("categorie");
-  if (
-    imageInput.value.trim() === "" ||
-    titleInput.value.trim() === "" ||
-    categorySelect.value.trim() === ""
-  ) {
-    const errorElementChamp = document.getElementById("error-messageChamp");
-    errorElementChamp.textContent =
-      "Certains champs du formulaire ne sont pas remplis";
+  const selectedImage = imageInput.files[0];
+
+  if (titleInput.value.trim() === "" || categorySelect.value.trim() === "") {
+    alert("Certains champs du formulaire ne sont pas remplis.");
     return;
   }
-
-  // Récupération des valeurs des champs
-  const selectedImage = imageInput.files[0];
-  const title = titleInput.value.trim();
-  const category = parseInt(categorySelect.value, 10);
 
   // Création de l'objet FormData pour contenir les champs du formulaire
   const formData = new FormData();
   formData.append("image", selectedImage);
-  formData.append("title", title);
-  formData.append("category", category);
+  formData.append("title", titleInput.value.trim());
+  formData.append("category", categorySelect.value);
 
   try {
     // Envoi de la requête avec le token dans l'entête Authorization
     const response = await fetch("http://localhost:5678/api/works", {
       method: "POST",
       headers: {
-        Authorization: "Bearer " + localStorage.getItem("token"),
+        Authorization: `Bearer ${token}`,
       },
       body: formData,
     });
-    if (response.ok) {
-      const data = await response.json();
-      // Mettre à jour l'UI ou rediriger l'utilisateur
-    } else {
+    if (!response.ok) {
       // Récupérer plus d'informations sur l'erreur
       const errorData = await response.json();
       throw new Error(`Erreur: ${response.statusText}` || errorData.message);
     }
+
+    const newWork = await response.json();
+
+    // Récupérez les œuvres stockées précédemment du localStorage
+    let works = JSON.parse(localStorage.getItem("works")) || [];
+    // Ajoutez le nouvel ouvrage à la liste
+    works.push(newWork);
+    // Mettez à jour les œuvres dans le localStorage
+    localStorage.setItem("works", JSON.stringify(works));
+    // Mettez à jour la galerie avec le nouvel ouvrage ajouté
+    displayWorks(works);
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'œuvre:", error);
   }
 }
+
+// Associer le gestionnaire de soumission au formulaire
+document.addEventListener("DOMContentLoaded", () => {
+  const addWorkForm = document.getElementById("addWorkForm");
+  if (addWorkForm) {
+    addWorkForm.addEventListener("submit", addWorkToGallery);
+  } else {
+    console.error("Le formulaire est introuvable dans le DOM.");
+  }
+});
+
+// Fonction asynchrone pour récupérer les œuvres depuis l'API et les stocker dans le localStorage
+const fetchWorksAndUpdateLocalStorage = async () => {
+  try {
+    // Vérifie si les œuvres sont déjà stockées dans le localStorage
+    let works = localStorage.getItem("works");
+
+    // Si les œuvres ne sont pas dans le localStorage ou si le localStorage a été vidé, les récupérer à partir de l'API
+    if (!works) {
+      const response = await fetch("http://localhost:5678/api/works");
+      if (!response.ok) {
+        throw new Error(
+          `Erreur de chargement des œuvres. Code HTTP : ${response.status}`
+        );
+      }
+      works = await response.json();
+
+      // Stocke les œuvres récupérées dans le localStorage pour un accès rapide la prochaine fois
+      localStorage.setItem("works", JSON.stringify(works));
+    } else {
+      // Si les données sont déjà présentes dans le localStorage, les parser pour les utiliser
+      works = JSON.parse(works);
+    }
+
+    // Mettre à jour l'interface utilisateur avec les œuvres récupérées
+    displayWorks(works);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des données de l'API :",
+      error
+    );
+    throw error;
+  }
+};
+
+// Sélectionne l'élément de la galerie
+const galleryElement = document.getElementById("gallery");
+
+// Vide la galerie avant de rajouter des éléments
+galleryElement.innerHTML = "";
 
 ////////////////////////ENVOIE fin//////////////////////////////////
 
