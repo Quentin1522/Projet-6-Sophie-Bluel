@@ -1,9 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   // Récupérer les références des éléments HTML qui dépendent de l'état de connexion
-  const editButton = document.getElementById("editButton"); // Bouton de modification
-  const iconSvg = document.getElementById("iconSvg"); // Icône SVG
-  const navList = document.querySelector("nav ul"); // Liste de navigation où les liens sont ajoutés
-  const bandeau = document.getElementById("bandeau"); //Bandeau
+  const navList = document.querySelector("nav ul"); // Liste dans laquelle figure login/logout
 
   // Fonction de gestionnaire de redirection vers la page login.html
   function redirectToLoginPage() {
@@ -35,22 +32,11 @@ document.addEventListener("DOMContentLoaded", function () {
       loginLI.textContent = "logout";
       loginLI.removeEventListener("click", redirectToLoginPage);
       loginLI.addEventListener("click", logout);
-      // Afficher le bouton de modification et l'icône
-      if (editButton) editButton.style.display = "inline";
-      if (iconSvg) iconSvg.style.display = "inline";
-      if (bandeau) bandeau.style.display = "block";
     } else {
       // Modifier le texte pour afficher "Login"
       loginLI.textContent = "login";
       loginLI.removeEventListener("click", logout);
       loginLI.addEventListener("click", redirectToLoginPage);
-
-      // Masquer le bouton de modification et l'icône
-      if (editButton) editButton.style.display = "none";
-      if (iconSvg) iconSvg.style.display = "none";
-      if (bandeau) bandeau.style.display = "none";
-
-      //Masquer le bandeau
     }
   }
 

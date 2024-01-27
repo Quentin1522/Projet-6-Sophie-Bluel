@@ -1,580 +1,383 @@
-// Récupération des éléments du DOM
+//constantes globales
 const gallery = document.getElementById("gallery");
 const filters = document.querySelector(".filters");
+const worksModal = document.querySelector(".work-modal");
+const token = localStorage.getItem("token");
 
-// Fonction asynchrone pour effectuer une requête API et récupérer les œuvres
-const getApi = async () =>
-  (await fetch("http://localhost:5678/api/works")).json();
+////////////////////////////////////////////
 
-// Fonction asynchrone pour effectuer une requête API et récupérer les catégories
-const getCategories = async () =>
-  (await fetch("http://localhost:5678/api/categories")).json();
-// Fonction pour créer un élément dans la galerie
-const displayApi = (api) => {
-  const figure = document.createElement("figure");
-  const img = document.createElement("img");
-  const figcaption = document.createElement("figcaption");
+//récupération des works
+async function getWork() {
+  const responseWorks = await fetch("http://localhost:5678/api/works");
+  //retourne array works
+  return await responseWorks.json();
+}
+getWork();
+////////////////////////////////////////////
 
-  // Attribution des valeurs à chaque élément
-  img.src = api.imageUrl;
-  figcaption.textContent = api.title;
+//affiche les works
+async function displayWorks(filterWorks = null) {
+  // signifie que si la fonction displayWorks est appelée sans argument, le paramètre filterWorks aura automatiquement la valeur null.
+  const works = filterWorks || (await getWork()); //  ||  = ou affecte une valeur à la variable works
 
-  // Ajout des éléments à la figure
-  figure.classList.add("itemGallery");
-  figure.append(img, figcaption);
+  //works = tableau des works
+  gallery.innerHTML = ""; // Vide la galerie avant de l'afficher
 
-  // Ajout de la figure à la galerie
-  gallery.appendChild(figure);
-};
+  works.forEach((works) => {
+    //création des éléments
+    const img = document.createElement("img");
+    const figcaption = document.createElement("figcaption");
+    const figure = document.createElement("figure");
 
-// Fonction pour afficher les œuvres dans la galerie
-const displayApis = (apis) => {
-  // Vide la galerie avant d'y ajouter de nouveaux éléments
-  gallery.innerHTML = "";
-  // Appelle la fonction displayApi pour chaque œuvre
-  apis.forEach(displayApi);
-};
+    //attribution des valeurs à chaque éléments en les récupérant via le tableau des works
+    img.src = works.imageUrl; //src = le format de la base de donnée
+    figcaption.textContent = works.title; //title = le format de la base de donnée
 
-// Fonction asynchrone pour créer les boutons de catégorie
-const createCategoryButtons = async () => {
-  // Récupération des catégories depuis l'API
-  const categories = await getCategories();
-
-  // Pour chaque catégorie, créer un bouton et l'ajouter aux filtres
-  categories.forEach((category) => {
-    const btn = document.createElement("button");
-    btn.textContent = category.name;
-    btn.id = category.id;
-    filters.appendChild(btn);
+    //ajout de img et figcaption à figure
+    figure.appendChild(img);
+    figure.appendChild(figcaption);
+    //ajout de figuire à gallery
+    gallery.appendChild(figure);
   });
-};
+}
+displayWorks();
+////////////////////////////////////////////
 
-// Fonction asynchrone pour filtrer les œuvres par catégorie
-const filterByCategory = async () => {
-  // Récupération de toutes les œuvres depuis l'API
-  const allGallery = await getApi();
+//récupération des catégories
+async function getCategories() {
+  const responseCategories = await fetch(
+    "http://localhost:5678/api/categories"
+  );
+  //retourne la liste des categori
+  return await responseCategories.json();
+}
+getCategories();
+////////////////////////////////////////////
+
+//créer est afficher les bouttons de catégories
+async function displayCategories() {
+  //categories = liste des catégories
+  const categories = await getCategories();
+  categories.forEach((category) => {
+    //création des bouttons catégories
+    const btnCategories = document.createElement("button");
+    //attribution des valeurs à chaque éléments en les récupérant via le tableau des catégories
+    btnCategories.textContent = category.name;
+    btnCategories.id = category.id;
+
+    //ajout des catégories dans les boutons
+    filters.appendChild(btnCategories);
+  });
+}
+displayCategories();
+////////////////////////////////////////////
+
+//filter les catégories avec les boutons et changer la couleur des boutons de filtre
+async function filterByCategories() {
+  //récupere le tableau des works
+  const arrayWorks = await getWork();
+
   // Sélection de tous les boutons de filtre
-  const buttons = document.querySelectorAll(".filters button");
+  const btns = document.querySelectorAll(".filters button");
 
-  // Pour chaque bouton de filtre, ajouter un écouteur d'événement de clic
-  buttons.forEach((button) => {
-    button.addEventListener("click", async (e) => {
+  //Pour chaque bouton de filtre, ajouter un écouteur d'événement de clic
+  btns.forEach((btn) => {
+    //ajout de l'évement au click sur les boutons
+    btn.addEventListener("click", async (e) => {
       // Récupération de l'ID de la catégorie depuis le bouton cliqué
       const categoryId = e.target.id;
-
-      // Filtrer les œuvres en fonction de la catégorie sélectionnée
       //categoryId différents de 0
-      const filteredGallery =
+      const filterWorks =
         categoryId !== "0"
-          ? allGallery.filter((api) => api.categoryId == categoryId)
-          : allGallery;
+          ? arrayWorks.filter((work) => work.categoryId == categoryId)
+          : arrayWorks;
 
       // Afficher les œuvres filtrées dans la galerie
-      displayApis(filteredGallery);
+      displayWorks(filterWorks);
 
-      // Changer la couleur du bouton cliqué
-      buttons.forEach((button) => {
-        button.style.backgroundColor = "#ffffff";
-        button.style.color = "#1D6154";
+      //change la couleur des boutons de filtre
+      btns.forEach((btn) => {
+        btn.style.backgroundColor = "#ffffff";
+        btn.style.color = "#1D6154";
       });
       e.target.style.backgroundColor = "#1D6154";
       e.target.style.color = "#ffffff";
     });
   });
+}
+filterByCategories();
+////////////////////////////////////////////
+
+//Modification de la page en fonction de l'état de connexion de l'utilsateur
+//banner
+const banner = document.querySelector(".banner"); //div banner (élement parent)
+const textBanner = document.createElement("p"); //création du paragraphe de banner
+textBanner.textContent = "Mode édition";
+const svgIconBanner = `
+<svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#ffffff" d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152V424c0 48.6 39.4 88 88 88H360c48.6 0 88-39.4 88-88V312c0-13.3-10.7-24-24-24s-24 10.7-24 24V424c0 22.1-17.9 40-40 40H88c-22.1 0-40-17.9-40-40V152c0-22.1 17.9-40 40-40H200c13.3 0 24-10.7 24-24s-10.7-24-24-24H88z"/></svg>
+`;
+banner.appendChild(textBanner); //place textBanner dans la div Banner
+//ajoute la chaîne SVG en tant que nœud DOM à l'élément banner
+banner.innerHTML += svgIconBanner;
+
+//modify
+const modifyItem = document.querySelector(".modify-item"); //div modify-item (élément parent)
+const btnModify = document.createElement("a"); //bouton modifier
+btnModify.textContent = "modifier"; //texte du bouton
+btnModify.classList = "modal-trigger"; //class qui permet d'ouvir la modale
+const SvgIconModify = `<svg class="modal-trigger" xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#000000" d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152V424c0 48.6 39.4 88 88 88H360c48.6 0 88-39.4 88-88V312c0-13.3-10.7-24-24-24s-24 10.7-24 24V424c0 22.1-17.9 40-40 40H88c-22.1 0-40-17.9-40-40V152c0-22.1 17.9-40 40-40H200c13.3 0 24-10.7 24-24s-10.7-24-24-24H88z"/></svg> `;
+modifyItem.appendChild(btnModify); //place le bouton dans la div modify-item
+//ajoute la chaîne SVG en tant que nœud DOM à l'élément modify-item
+modifyItem.innerHTML += SvgIconModify;
+//vérification de l'état de connexion de l'utilisateur
+//définit une fonction fléchée isLoggedIn qui vérifie si l'utilisateur est connecté en vérifiant la présence du token dans le stockage local.
+const isLoggedIn = () => localStorage.getItem("token") !== null;
+
+const updateUI = () => {
+  const banner = document.querySelector(".banner");
+  const modifyItem = document.querySelector(".modify-item");
+
+  if (isLoggedIn()) {
+    //si il est connecter
+    banner.style.display = "flex"; // affiche banner
+    modifyItem.style.visibility = "visible"; // affiche modify-item
+    //si il n'est pas connecter
+  } else {
+    banner.style.display = "none"; // affiche pas banner
+    modifyItem.style.visibility = "hidden"; // affiche pas modify-item
+  }
 };
+updateUI();
+////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////
-// Fonction asynchrone pour initialiser la galerie
-const initializeGallery = async () => {
-  // Créer les boutons de catégorie
-  await createCategoryButtons();
-  // Ajouter les écouteurs d'événements pour les filtres
-  await filterByCategory();
-  // Récupérer toutes les œuvres et les afficher dans la galerie
-  const allGallery = await getApi();
-  displayApis(allGallery);
-};
+//gestion des modales
+const modalWrapper = document.querySelector(".modal-wrapper"); //récupere le container des modal (élément parent)
+const modalTrigger = document.querySelectorAll(".modal-trigger"); // sélectionne tous les élément ayant la class "modal-trigger"
+const firstModal = document.querySelector(".modal-principale"); //première modal
+const secondModal = document.querySelector(".modal-secondaire"); //seconde modal
+const buttonFirstModal = document.querySelector(".modal-principale-btn"); //bouton première modal
+const arrow = document.querySelector(".arrow"); //récuperation de la flèche de la deuxième modale
 
-// Sélectionnez l'élément parent
-const modifyContainer = document.querySelector(".modify");
+//première modale et croix(avec modal-trigger)
+modalTrigger.forEach((trigger) => {
+  trigger.addEventListener("click", toggleModal); //au click dclenche la fonction toggle modal
 
-// Fonction pour créer le bouton "modifier" dynamiquement
-const createModifyButton = () => {
-  // Créer le bouton modifier
-  const modifyButton = document.createElement("a");
-  modifyButton.textContent = "modifier";
-  modifyButton.classList.add("modal-trigger");
+  function toggleModal() {
+    modalWrapper.classList.toggle("active"); //rajoute la class "active si elle n'y est pas et rajoute display block/none"
+    firstModal.style.display = "block"; //remet la première modale en block après avoir fermé les deux modales
+    secondModal.style.display = "none"; //seconde modal en none
+  }
+});
 
-  // Créer le SVG
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("width", "16");
-  svg.setAttribute("height", "16");
-  svg.setAttribute("viewBox", "0 0 16 16");
+//deuxième modal
+buttonFirstModal.addEventListener("click", openSecondModal); //ajout d'un gestionnaire d'évement qui exécute la fonction openSecondModal
 
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute(
-    "d",
-    "M13.5229 1.68576L13.8939 2.05679C14.1821 2.34503 14.1821 2.81113 13.8939 3.0963L13.0016 3.99169L11.5879 2.57808L12.4803 1.68576C12.7685 1.39751 13.2346 1.39751 13.5198 1.68576H13.5229ZM6.43332 7.73578L10.5484 3.61759L11.9621 5.03121L7.84387 9.14633C7.75494 9.23525 7.64455 9.29964 7.52496 9.33337L5.73111 9.84546L6.2432 8.05162C6.27693 7.93203 6.34133 7.82164 6.43025 7.73271L6.43332 7.73578ZM11.4408 0.646245L5.39074 6.6932C5.12397 6.95998 4.93078 7.28808 4.82959 7.64685L3.9526 10.7133C3.879 10.9708 3.94953 11.2468 4.13965 11.4369C4.32977 11.627 4.60574 11.6976 4.86332 11.624L7.92973 10.747C8.29156 10.6427 8.61967 10.4495 8.88338 10.1858L14.9334 4.13888C15.7951 3.27722 15.7951 1.87894 14.9334 1.01728L14.5624 0.646245C13.7007 -0.215415 12.3024 -0.215415 11.4408 0.646245ZM2.69844 1.84214C1.20816 1.84214 0 3.05031 0 4.54058V12.8812C0 14.3715 1.20816 15.5796 2.69844 15.5796H11.0391C12.5293 15.5796 13.7375 14.3715 13.7375 12.8812V9.44683C13.7375 9.039 13.4094 8.71089 13.0016 8.71089C12.5937 8.71089 12.2656 9.039 12.2656 9.44683V12.8812C12.2656 13.5589 11.7167 14.1078 11.0391 14.1078H2.69844C2.02076 14.1078 1.47188 13.5589 1.47188 12.8812V4.54058C1.47188 3.86291 2.02076 3.31402 2.69844 3.31402H6.13281C6.54065 3.31402 6.86875 2.98591 6.86875 2.57808C6.86875 2.17025 6.54065 1.84214 6.13281 1.84214H2.69844Z"
-  );
-  path.setAttribute("fill", "black");
+function openSecondModal() {
+  firstModal.style.display = "none"; //première modal en none
+  secondModal.style.display = "block"; //seconde modal en block
+}
 
-  // Ajouter le bouton et le SVG à l'élément parent
-  const modifyContainer = document.querySelector(".modify-item");
-  svg.appendChild(path);
-  modifyContainer.appendChild(modifyButton);
-  modifyContainer.appendChild(svg);
-};
+//retourne à la première modal
+arrow.addEventListener("click", backToFirstModal); //ajout d'un gestionnaire d'évement qui exécute la fonction backToFirstModal
 
-// Appeler la fonction pour créer le bouton
-createModifyButton();
+function backToFirstModal() {
+  firstModal.style.display = "block"; //première modal en block
+  secondModal.style.display = "none"; //seconde modal en none
+}
+////////////////////////////////////////////
 
-// Sélectionnez l'élément input file
-const imageInput = document.getElementById("image");
+//affichage des works dans le première modal + des icone poubelle
+async function displayWorkModal() {
+  worksModal.innerHTML = ""; //vide le HTML
+  const arrayModals = await getWork();
+  arrayModals.forEach((works) => {
+    const img = document.createElement("img");
+    const figure = document.createElement("figure");
+    //ajout de la class "trash" sur les SVG
+    const trashIcon = `<svg class="trash" xmlns="http://www.w3.org/2000/svg" width="9" height="11" viewBox="0 0 9 11" fill="none"><path d="M2.71607 0.35558C2.82455 0.136607 3.04754 0 3.29063 0H5.70938C5.95246 0 6.17545 0.136607 6.28393 0.35558L6.42857 0.642857H8.35714C8.71272 0.642857 9 0.930134 9 1.28571C9 1.64129 8.71272 1.92857 8.35714 1.92857H0.642857C0.287277 1.92857 0 1.64129 0 1.28571C0 0.930134 0.287277 0.642857 0.642857 0.642857H2.57143L2.71607 0.35558ZM0.642857 2.57143H8.35714V9C8.35714 9.70915 7.78058 10.2857 7.07143 10.2857H1.92857C1.21942 10.2857 0.642857 9.70915 0.642857 9V2.57143ZM2.57143 3.85714C2.39464 3.85714 2.25 4.00179 2.25 4.17857V8.67857C2.25 8.85536 2.39464 9 2.57143 9C2.74821 9 2.89286 8.85536 2.89286 8.67857V4.17857C2.89286 4.00179 2.74821 3.85714 2.57143 3.85714ZM4.5 3.85714C4.32321 3.85714 4.17857 4.00179 4.17857 4.17857V8.67857C4.17857 8.85536 4.32321 9 4.5 9C4.67679 9 4.82143 8.85536 4.82143 8.67857V4.17857C4.82143 4.00179 4.67679 3.85714 4.5 3.85714ZM6.42857 3.85714C6.25179 3.85714 6.10714 4.00179 6.10714 4.17857V8.67857C6.10714 8.85536 6.25179 9 6.42857 9C6.60536 9 6.75 8.85536 6.75 8.67857V4.17857C6.75 4.00179 6.60536 3.85714 6.42857 3.85714Z" fill="white"/></svg>`;
+    const div = document.createElement("div"); //parent des icônes poubelle
+    div.innerHTML = trashIcon; // mise en place des icone dans le parent
+    div.id = works.id; //récupère l'id des works sur les poubelles
+    figure.appendChild(img);
+    figure.appendChild(div);
+    worksModal.appendChild(figure);
+    img.src = works.imageUrl; //src = le format de la base de donnée
+  });
+  deleteWorks(); // display est une fonction async appeler deleteWorks ici permet d'attendre que les trash soit créer
+}
+displayWorkModal(); // affihce tous les work dans la modal
 
-// Sélectionnez le bouton Valider
-const validerButton = document.getElementById("submitValider");
+/////////////////////////////////////
 
-// Sélectionnez l'élément conteneur-ajout
-const conteneurAjout = document.querySelector(".conteneur-ajout");
+//récupration de l'id des works
+async function getWorkId() {
+  const responseId = await fetch("http://localhost:5678/api/works");
+  //retourne la liste des id
+  return await responseId.json();
+}
+getWorkId();
+/////////////////////////////////////
 
-// Ajoutez un écouteur d'événement input sur l'élément input file
-imageInput.addEventListener("input", () => {
-  // Vérifiez si un fichier a été sélectionné
-  if (imageInput.files.length > 0) {
-    // Récupérez le fichier sélectionné
-    const selectedImage = imageInput.files[0];
+//gestion de "CASE" et du formulaire de la deuxième modal
+//récupération de case
+const contentAddImg = document.querySelector(".case");
 
-    // Vérifie la taille du fichier (en octets)
+// récupération du bouton qui permet de mettre une image
+const addImgBtn = document.getElementById("add-img-btn");
+
+//gestionnaire d'évenemtn sur le boutton d'ajout d'image
+addImgBtn.addEventListener("input", () => {
+  //on vérifie qu'un fichier est sélectionné
+  if (addImgBtn.files.length > 0) {
+    //récupération du fichier
+    const selectedImage = addImgBtn.files[0];
+
+    //vérifications de la taille de l'image (en octets)
     const maxSizeInBytes = 4 * 1024 * 1024; // 4 Mo
     if (selectedImage.size > maxSizeInBytes) {
-      //Sélection de l'élément qui sert à afficher le message d'erreur
-      const errorElement = document.getElementById("error-message");
-      errorElement.textContent =
-        "La taille de l'image ne doit pas dépasser 4 Mo.";
-      // Réinitialisez l'input pour effacer la sélection
-      imageInput.value = "";
-      return;
+      //récupération de la span pour afficher un message d'erreur image trop grande
+      const errorSizeImg = document.getElementById(
+        "message-erreur-taille-image"
+      );
+      //ajout du texte dans la span
+      errorSizeImg.textContent =
+        "La taille de l'image ne doit pas dépasser 4 mo.";
+      //réinialisation du champs image
+      addImgBtn.value = "";
+    } else {
+      //création d'un objet URL pour l'image sélectionné
+      const selectedImageUrl = URL.createObjectURL(selectedImage);
+
+      //création d'un élément image
+      const previewImgSelected = document.createElement("img");
+      //ajout de l'image sélectionné dans l'élément image créer
+      previewImgSelected.src = selectedImageUrl;
+
+      //vide "case" pour afficher l'image sélectionné
+      contentAddImg.innerHTML = "";
+      //mettre l'image sélectionné dans "case"
+      contentAddImg.appendChild(previewImgSelected);
     }
 
-    // Créez un objet URL pour l'image sélectionnée
-    const imageURL = URL.createObjectURL(selectedImage);
+    //catégories dynamique dans le formulaire d'envoie
+    getCategories()
+      .then((categories) => {
+        const categorieSelect = document.getElementById("categorie");
 
-    // Créez un élément img pour afficher l'image
-    const previewImage = document.createElement("img");
-    previewImage.src = imageURL;
+        categories.forEach((category) => {
+          //création des catégories
+          const optionElement = document.createElement("option");
+          optionElement.value = category.id;
+          optionElement.textContent = category.name;
 
-    // Effacez le contenu précédent du conteneur-ajout
-    conteneurAjout.innerHTML = "";
+          //mettre les catégories des les options du formulaire
+          categorieSelect.appendChild(optionElement);
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
 
-    // Ajoutez l'élément img au conteneur-ajout
-    conteneurAjout.appendChild(previewImage);
+    // Sélectionnez le bouton Valider
+    const validerButton = document.getElementById("submitValider");
+
+    //change la couleur du boutton valiser quand une image est sélestionné
     validerButton.style.backgroundColor = "#1d6154";
     validerButton.style.color = "white";
   }
 });
+////////////////////////////////////////////
 
-// Ajout de l'état de connexion pour montrer/masquer les boutons de modification
-const isLoggedIn = () => localStorage.getItem("token") !== null;
+//fonction add work
+//récupération du champs titre
+const titleChamp = document.getElementById(title);
 
-const updateModifyElements = () => {
-  const modifyElements = document.querySelectorAll(".modify-item");
-  modifyElements.forEach((elem) => {
-    elem.style.visibility = isLoggedIn() ? "visible" : "hidden";
-  });
-};
+//récupération du champs catégories
+const selectCategoriesChamp = document.getElementById(categorie);
 
-// Initialisation de la galerie
-document.addEventListener("DOMContentLoaded", async () => {
-  await initializeGallery();
-  updateModifyElements();
-});
+//récupération du bouton valider du formauilaire de la modal
+const submitFormBtn = document.getElementById("submitValider");
 
-//Modal
-// Sélection des éléments DOM
-const modalWrapper = document.querySelector(".modal-wrapper");
-const modalTriggers = document.querySelectorAll(".modal-trigger");
-const galleryModal = document.getElementById("gallery-modal");
-const wrapperPhoto = document.querySelector(".wrapperPhoto");
-const ajoutBtn = document.querySelector(".ajout");
-const ajoutFile = document.querySelector(".ajout-file");
-const photoTriggers = document.querySelectorAll(".photo-trigger");
-const closePhotoBtn = document.querySelector(".close-photo");
-const arrowBtn = document.querySelector(".arrow");
-const formPhoto = document.querySelector(".form-photo");
+//récupérer de la span "erreur un champ n'est pas remplie"
+const erreurChampVide = document.getElementById("error-messageChamp");
 
-let works = []; // Déclarez la variable works en dehors des fonctions
+function addWork() {
+  submitFormBtn.addEventListener("submit", (event) => {
+    // Création de l'objet FormData pour contenir les champs du formulaire
+    const formData = new FormData();
+    // Ajouter l'image sélectionnée
+    formData.append("image", addImgBtn.files[0]);
+    // Ajouter le titre
+    formData.append("title", titleChamp.value.trim());
 
-// Fonction pour basculer l'état du modal principal
-function toggleModal(e) {
-  e.preventDefault();
-  modalWrapper.classList.toggle("active");
-}
+    // Ajouter la catégorie
+    formData.append("category", selectCategoriesChamp.value);
 
-// Fonction pour basculer l'état de la galerie photo
-function toggleGalleryModal() {
-  galleryModal.classList.toggle("active");
-}
-// Mettre à jour la visibilité des boutons de suppression uniquement si la modal est active
-if (galleryModal.classList.contains("active")) {
-  updateDeleteButtons();
-}
-
-// Fonction pour basculer l'état de l'ajout de photo
-function toggleAddPhotoModal(e) {
-  wrapperPhoto.classList.toggle("active");
-}
-
-// Attacher les gestionnaires d'événements pour les déclencheurs modaux principaux
-modalTriggers.forEach((trigger) => {
-  trigger.addEventListener("click", toggleModal);
-});
-
-// Attacher les gestionnaires d'événements pour le bouton "Gallerie photo"
-photoTriggers.forEach((trigger) => {
-  trigger.addEventListener("click", toggleGalleryModal);
-});
-
-// Attacher un gestionnaire d'événements pour le bouton "Ajouter une photo"
-ajoutBtn.addEventListener("click", toggleAddPhotoModal);
-
-// Attacher un gestionnaire d'événements pour la croix de la deuxième modal
-closePhotoBtn.addEventListener("click", toggleAddPhotoModal);
-
-// Ajouter un gestionnaire d'événements à la flèche dans la deuxième modal
-arrowBtn.addEventListener("click", (e) => {
-  if (e) {
-    e.preventDefault();
-  }
-  toggleAddPhotoModal();
-  toggleGalleryModal();
-});
-
-document.querySelectorAll(".close-modal").forEach((button) => {
-  button.addEventListener("click", function () {
-    // Assurez-vous que la galerie est bien fermée
-    galleryModal.classList.remove("active");
-    // Masquer les boutons de suppression puisque la modal est fermée
-  });
-});
-///////////////////////////////////
-// Fonction pour créer un élément dans la galerie
-const createGalleryItem = (work) => {
-  const figure = document.createElement("figure");
-  const img = document.createElement("img");
-
-  // Ajouter les données récupérées à la balise img
-  img.src = work.imageUrl;
-  img.alt = work.title;
-
-  figure.classList.add("itemGallery");
-  figure.appendChild(img);
-
-  // Création du bouton de suppression
-  const deleteButton = document.createElement("button");
-  deleteButton.type = "button"; //pour éviter la soumission du formulaire
-  deleteButton.classList.add("delete-button");
-
-  // Création du SVG trash
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-  svg.setAttribute("width", "9");
-  svg.setAttribute("height", "11");
-  svg.setAttribute("viewBox", "0 0 9 11");
-  svg.setAttribute("fill", "none");
-
-  // Création du chemin du SVG
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute(
-    "d",
-    "M2.71607 0.35558C2.82455 0.136607 3.04754 0 3.29063 0H5.70938C5.95246 0 6.17545 0.136607 6.28393 0.35558L6.42857 0.642857H8.35714C8.71272 0.642857 9 0.930134 9 1.28571C9 1.64129 8.71272 1.92857 8.35714 1.92857H0.642857C0.287277 1.92857 0 1.64129 0 1.28571C0 0.930134 0.287277 0.642857 0.642857 0.642857H2.57143L2.71607 0.35558ZM0.642857 2.57143H8.35714V9C8.35714 9.70915 7.78058 10.2857 7.07143 10.2857H1.92857C1.21942 10.2857 0.642857 9.70915 0.642857 9V2.57143ZM2.57143 3.85714C2.39464 3.85714 2.25 4.00179 2.25 4.17857V8.67857C2.25 8.85536 2.39464 9 2.57143 9C2.74821 9 2.89286 8.85536 2.89286 8.67857V4.17857C2.89286 4.00179 2.74821 3.85714 2.57143 3.85714ZM4.5 3.85714C4.32321 3.85714 4.17857 4.00179 4.17857 4.17857V8.67857C4.17857 8.85536 4.32321 9 4.5 9C4.67679 9 4.82143 8.85536 4.82143 8.67857V4.17857C4.82143 4.00179 4.67679 3.85714 4.5 3.85714ZM6.42857 3.85714C6.25179 3.85714 6.10714 4.00179 6.10714 4.17857V8.67857C6.10714 8.85536 6.25179 9 6.42857 9C6.60536 9 6.75 8.85536 6.75 8.67857V4.17857C6.75 4.00179 6.60536 3.85714 6.42857 3.85714Z"
-  );
-  path.setAttribute("fill", "white");
-
-  // Ajout du chemin au SVG
-  svg.appendChild(path);
-
-  // Ajout du SVG au bouton de suppression
-  deleteButton.appendChild(svg);
-
-  // Ajout du gestionnaire d'événement pour le bouton de suppression
-  deleteButton.addEventListener("click", async (event) => {
-    event.preventDefault();
-    if (confirm(`Êtes-vous sûr de vouloir supprimer "${work.title}" ?`)) {
-      try {
-        const response = await fetch(
-          `http://localhost:5678/api/works/${work.id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: "Bearer " + localStorage.getItem("token"),
-            },
-          }
-        );
-        if (!response.ok) {
-          throw new Error(
-            `Erreur lors de la suppression : ${response.statusText}`
-          );
-        }
-
-        // Suppression de l'œuvre du localStorage
-        let works = JSON.parse(localStorage.getItem("works"));
-        works = works.filter((storedWork) => storedWork.id !== work.id);
-        localStorage.setItem("works", JSON.stringify(works));
-
-        // Mise à jour de la galerie
-        displayWorks(works);
-
-        // Suppression de l'élément du DOM
-        figure.remove();
-      } catch (error) {
-        console.error("Erreur lors de la suppression :", error);
-      }
-    }
-  });
-  // Ajout du bouton de suppression à l'élément figure
-  figure.appendChild(deleteButton);
-
-  return figure;
-};
-
-// Fonction pour afficher les œuvres dans la galerie
-const displayWorks = (works) => {
-  galleryModal.innerHTML = ""; // Vide la galerie avant d'ajouter de nouveaux éléments
-  works.forEach((work) => {
-    const galleryItem = createGalleryItem(work);
-    galleryModal.appendChild(galleryItem);
-  });
-};
-
-// Fonction asynchrone pour initialiser la galerie
-const initializeGalleryModal = async () => {
-  try {
-    works = await fetchWorks();
-    displayWorks(works);
-  } catch (error) {
-    console.error("Erreur lors de l'initialisation de la galerie :", error);
-  }
-};
-
-// Appeler la fonction d'initialisation de la galerie
-document.addEventListener("DOMContentLoaded", initializeGalleryModal);
-////////////////////////ENVOIE//////////////////////////////////////////////////
-// Fonction asynchrone pour récupérer les œuvres depuis l'API dans la modal
-const fetchWorks = async () => {
-  try {
-    const response = await fetch("http://localhost:5678/api/works");
-    if (!response.ok) {
-      throw new Error(
-        `Erreur de chargement des œuvres. Code HTTP : ${response.status}`
-      );
-    }
-    const data = await response.json();
-
-    // Stocker les œuvres récupérées dans le localStorage
-    localStorage.setItem("works", JSON.stringify(data));
-
-    return data;
-  } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des données de l'API :",
-      error
-    );
-    throw error;
-  }
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  const addWorkForm = document.getElementById("addWorkForm");
-  if (addWorkForm) {
-    addWorkForm.addEventListener("submit", addWorkToGallery);
-  } else {
-    console.error("Le formulaire est introuvable dans le DOM.");
-  }
-});
-
-async function addWorkToGallery(event) {
-  event.preventDefault(); // Empêche le comportement par défaut du formulaire
-
-  // Récupération du token d'authentification (si nécessaire pour l'API)
-  const token = localStorage.getItem("token");
-  if (!token) {
-    console.error("Vous devez être connecté pour effectuer cette action.");
-    return;
-  }
-
-  // Récupération des éléments et des valeurs du formulaire
-  const titleInput = document.getElementById("title");
-  const categorySelect = document.getElementById("categorie");
-  const selectedImage = imageInput.files[0];
-
-  if (titleInput.value.trim() === "" || categorySelect.value.trim() === "") {
-    alert("Certains champs du formulaire ne sont pas remplis.");
-    return;
-  }
-
-  // Création de l'objet FormData pour contenir les champs du formulaire
-  const formData = new FormData();
-  formData.append("image", selectedImage);
-  formData.append("title", titleInput.value.trim());
-  formData.append("category", categorySelect.value);
-
-  try {
-    // Envoi de la requête avec le token dans l'entête Authorization
-    const response = await fetch("http://localhost:5678/api/works", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-    if (!response.ok) {
-      // Récupérer plus d'informations sur l'erreur
-      const errorData = await response.json();
-      throw new Error(`Erreur: ${response.statusText}` || errorData.message);
-    }
-
-    const newWork = await response.json();
-
-    // Récupérez les œuvres stockées précédemment du localStorage
-    let works = JSON.parse(localStorage.getItem("works")) || [];
-    // Ajoutez le nouvel ouvrage à la liste
-    works.push(newWork);
-    // Mettez à jour les œuvres dans le localStorage
-    localStorage.setItem("works", JSON.stringify(works));
-    // Mettez à jour la galerie avec le nouvel ouvrage ajouté
-    displayWorks(works);
-  } catch (error) {
-    console.error("Erreur lors de l'ajout de l'œuvre:", error);
-  }
-}
-
-// Associer le gestionnaire de soumission au formulaire
-document.addEventListener("DOMContentLoaded", () => {
-  const addWorkForm = document.getElementById("addWorkForm");
-  if (addWorkForm) {
-    addWorkForm.addEventListener("submit", addWorkToGallery);
-  } else {
-    console.error("Le formulaire est introuvable dans le DOM.");
-  }
-});
-
-// Fonction asynchrone pour récupérer les œuvres depuis l'API et les stocker dans le localStorage
-const fetchWorksAndUpdateLocalStorage = async () => {
-  try {
-    // Vérifie si les œuvres sont déjà stockées dans le localStorage
-    let works = localStorage.getItem("works");
-
-    // Si les œuvres ne sont pas dans le localStorage ou si le localStorage a été vidé, les récupérer à partir de l'API
-    if (!works) {
-      const response = await fetch("http://localhost:5678/api/works");
-      if (!response.ok) {
-        throw new Error(
-          `Erreur de chargement des œuvres. Code HTTP : ${response.status}`
-        );
-      }
-      works = await response.json();
-
-      // Stocke les œuvres récupérées dans le localStorage pour un accès rapide la prochaine fois
-      localStorage.setItem("works", JSON.stringify(works));
+    //vérifie si les champs sont vide et affiche le message d'erreur
+    if (titleChamp === "" || selectCategoriesChamp === "" || addImgBtn === "") {
+      erreurChampVide.textContent = "Un des champs est vide.";
+      event.preventDefault(); // Empêche la soumission du formulaire
     } else {
-      // Si les données sont déjà présentes dans le localStorage, les parser pour les utiliser
-      works = JSON.parse(works);
+      fetch("http://localhost:5678/api/works", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      })
+        //gestion de la réponse de la requête
+        //vérifie si la réponse est ok (then)
+        .then((response) => {
+          //si la réponse est différente de ok
+          if (!response.ok) {
+            return response.json();
+          } else {
+            //génère une erreur si il ya un problème avec la requete
+            throw new Error("Erreur lors de l'ajout de l'œuvre ");
+          }
+        })
+        .then((data) => {
+          console.log("Réponse de la requête : ", data);
+          displayWorkModal();
+          displayWorks();
+        })
+        //capture les erreur lors de la requete
+        .catch((error) => {
+          console.error(error);
+        });
     }
-
-    // Mettre à jour l'interface utilisateur avec les œuvres récupérées
-    displayWorks(works);
-  } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des données de l'API :",
-      error
-    );
-    throw error;
-  }
-};
-
-// Sélectionne l'élément de la galerie
-const galleryElement = document.getElementById("gallery");
-
-// Vide la galerie avant de rajouter des éléments
-galleryElement.innerHTML = "";
-
-////////////////////////ENVOIE fin//////////////////////////////////
-
-/////////////////////////Categories dynamique////////////////////
-// Utilisez la fonction getCategories pour récupérer les catégories
-getCategories()
-  .then((categories) => {
-    const categorieSelect = document.getElementById("categorie");
-
-    categories.forEach((category) => {
-      const optionElement = document.createElement("option");
-      optionElement.value = category.id;
-      optionElement.textContent = category.name;
-      categorieSelect.appendChild(optionElement);
-    });
-  })
-  .catch((error) => {
-    console.error(error); // Affichez les erreurs éventuelles dans la console
-  });
-
-//////////
-// Fonction pour ouvrir une modal
-function openModal(modal) {
-  modal.classList.add("active");
-  updateDeleteIconsVisibility("visible"); // Rendre les icônes de suppression visibles
-}
-
-// Fonction pour fermer une modal
-function closeModal(modal) {
-  modal.classList.remove("active");
-  updateDeleteIconsVisibility("hidden"); // Masquer les icônes de suppression
-}
-
-// Mise à jour de la visibilité des icônes de suppression
-function updateDeleteIconsVisibility(visibility) {
-  document.querySelectorAll(".delete-button").forEach((button) => {
-    button.style.visibility = visibility;
   });
 }
 
-// Attacher les gestionnaires d'événements à ouvrir/fermer les modals
-document.addEventListener("DOMContentLoaded", () => {
-  modalTriggers.forEach((trigger) => {
-    trigger.addEventListener("click", (e) => toggleModal(modalWrapper));
-  });
+/////////////////////////////////////
 
-  photoTriggers.forEach((trigger) => {
-    trigger.addEventListener("click", () => toggleModal(galleryModal));
-  });
-
-  // Fermer les modals si les boutons de fermeture sont cliqués
-  document.querySelectorAll(".close-modal").forEach((button) => {
-    button.addEventListener("click", () => {
-      closeModal(galleryModal);
-      closeModal(modalWrapper);
+//fonction DELETE work
+function deleteWorks() {
+  const id = getWorkId();
+  console.log(id);
+  const trashButon = document.querySelectorAll(".trash");
+  trashButon.forEach((trashSVG) => {
+    trashSVG.addEventListener("click", () => {
+      const i = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      fetch("http://localhost:5678/api/works/{$id}" + i)
+        .then((respose) => {
+          if (!respose.ok) {
+            console.log("delete refuser");
+            return respose.json();
+          }
+        })
+        .then((data) => {
+          console.log("delete ok:", data);
+          displayWorkModal;
+          displayWorks;
+        });
     });
   });
-});
-
-// Fonction pour basculer entre ouvrir et fermer une modal
-function toggleModal(modal) {
-  if (modal && modal.classList && modal.classList.contains("active")) {
-    modal.classList.remove("active");
-    updateDeleteIconsVisibility("hidden"); // Masquer les icônes de suppression
-  } else if (modal && modal.classList) {
-    modal.classList.add("active");
-    updateDeleteIconsVisibility("visible"); // Rendre les icônes de suppression visibles
-  }
-
-  // Vérifier si modal existe et possède la propriété classList
-  if (modal && modal.classList) {
-    // Sélectionnez les icônes de suppression à l'intérieur de la modal
-    const deleteIcons = modal.querySelectorAll(".delete-button svg");
-
-    // Parcourez chaque icône et ajoutez ou supprimez la classe pour modifier la visibilité
-    deleteIcons.forEach((icon) => {
-      icon.classList.toggle("visible");
-    });
-  }
 }
-////////////////
+deleteWorks();
+//////////////////////////////////////
