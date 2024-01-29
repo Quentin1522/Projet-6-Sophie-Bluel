@@ -289,11 +289,12 @@ addImgBtn.addEventListener("input", () => {
 ////////////////////////////////////////////
 
 //fonction add work
+
 //récupération du champs titre
-const titleChamp = document.getElementById(title);
+const titleChamp = document.getElementById("title").value.trim();
 
 //récupération du champs catégories
-const selectCategoriesChamp = document.getElementById(categorie);
+const selectCategoriesChamp = document.getElementById("categorie").value;
 
 //récupération du bouton valider du formauilaire de la modal
 const submitFormBtn = document.getElementById("submitValider");
@@ -302,25 +303,28 @@ const submitFormBtn = document.getElementById("submitValider");
 const erreurChampVide = document.getElementById("error-messageChamp");
 
 function addWork() {
-  submitFormBtn.addEventListener("submit", (event) => {
+  submitFormBtn.addEventListener("submit", () => {
     // Création de l'objet FormData pour contenir les champs du formulaire
     const formData = new FormData();
     // Ajouter l'image sélectionnée
     formData.append("image", addImgBtn.files[0]);
     // Ajouter le titre
     formData.append("title", titleChamp.value.trim());
-
     // Ajouter la catégorie
     formData.append("category", selectCategoriesChamp.value);
 
     //vérifie si les champs sont vide et affiche le message d'erreur
-    if (titleChamp === "" || selectCategoriesChamp === "" || addImgBtn === "") {
+    if (
+      titleChamp.value === "" ||
+      selectCategoriesChamp.value === "" ||
+      addImgBtn === ""
+    ) {
       erreurChampVide.textContent = "Un des champs est vide.";
-      event.preventDefault(); // Empêche la soumission du formulaire
     } else {
       fetch("http://localhost:5678/api/works", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: formData,
@@ -348,36 +352,44 @@ function addWork() {
     }
   });
 }
-
+addWork();
 /////////////////////////////////////
 
 //fonction DELETE work
 function deleteWorks() {
-  const id = getWorkId();
-  console.log(id);
-  const trashButon = document.querySelectorAll(".trash");
-  trashButon.forEach((trashSVG) => {
+  //récupère tout les svg icone poubelle
+  const trashButton = document.querySelectorAll(".trash");
+  trashButton.forEach((trashSVG) => {
     trashSVG.addEventListener("click", () => {
-      const i = {
+      //grâce à parent.node on accède au parent des icone svg et on récupère leur ID qui est celui du works
+      const id = trashSVG.parentNode.id;
+      const options = {
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       };
-      fetch("http://localhost:5678/api/works/{$id}" + i)
-        .then((respose) => {
-          if (!respose.ok) {
-            console.log("delete refuser");
-            return respose.json();
+      fetch("http://localhost:5678/api/works/" + id, options)
+        .then((response) => {
+          if (!response.ok) {
+            // Si la réponse n'est pas OK, on lance une erreur qui sera capturée dans le bloc catch
+            throw new Error("Erreur lors de la suppression de l'œuvre");
           }
         })
-        .then((data) => {
-          console.log("delete ok:", data);
-          displayWorkModal;
-          displayWorks;
+        .then(() => {
+          // Si la suppression réussit, on affiche un message dans la console et met à jour l'affichage
+          console.log("Suppression réussie");
+          displayWorkModal();
+          displayWorks();
+        })
+        // Capture des erreurs lors de la requête
+        .catch((error) => {
+          console.error(error);
         });
     });
   });
 }
 deleteWorks();
+
 //////////////////////////////////////
