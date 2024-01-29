@@ -289,63 +289,50 @@ addImgBtn.addEventListener("input", () => {
 ////////////////////////////////////////////
 
 //fonction add work
-
-//récupération du champs titre
-const titleChamp = document.getElementById("title").value.trim();
-
-//récupération du champs catégories
-const selectCategoriesChamp = document.getElementById("categorie").value;
-
-//récupération du bouton valider du formauilaire de la modal
-const submitFormBtn = document.getElementById("submitValider");
-
-//récupérer de la span "erreur un champ n'est pas remplie"
-const erreurChampVide = document.getElementById("error-messageChamp");
-
 function addWork() {
-  submitFormBtn.addEventListener("submit", () => {
-    // Création de l'objet FormData pour contenir les champs du formulaire
-    const formData = new FormData();
-    // Ajouter l'image sélectionnée
-    formData.append("image", addImgBtn.files[0]);
-    // Ajouter le titre
-    formData.append("title", titleChamp.value.trim());
-    // Ajouter la catégorie
-    formData.append("category", selectCategoriesChamp.value);
+  //récupérer de la span "erreur un champ n'est pas remplie"
+  const erreurChampVide = document.getElementById("error-messageChamp");
 
-    //vérifie si les champs sont vide et affiche le message d'erreur
+  const form = document.getElementById("addWorkForm");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const titleChamp = document.getElementById("title").value.trim();
+    const selectCategoriesChamp = document.getElementById("categorie").value;
+
     if (
-      titleChamp.value === "" ||
-      selectCategoriesChamp.value === "" ||
-      addImgBtn === ""
+      titleChamp === "" ||
+      selectCategoriesChamp === "" ||
+      addImgBtn.files.length === 0
     ) {
       erreurChampVide.textContent = "Un des champs est vide.";
     } else {
+      const formData = new FormData();
+      formData.append("image", addImgBtn.files[0]);
+      formData.append("title", titleChamp);
+      formData.append("category", selectCategoriesChamp);
+
+      const token = localStorage.getItem("token");
+
       fetch("http://localhost:5678/api/works", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: formData,
       })
-        //gestion de la réponse de la requête
-        //vérifie si la réponse est ok (then)
         .then((response) => {
-          //si la réponse est différente de ok
           if (!response.ok) {
-            return response.json();
-          } else {
-            //génère une erreur si il ya un problème avec la requete
-            throw new Error("Erreur lors de l'ajout de l'œuvre ");
+            throw new Error("Erreur lors de l'ajout de l'œuvre");
           }
+          return response.json();
         })
         .then((data) => {
           console.log("Réponse de la requête : ", data);
           displayWorkModal();
           displayWorks();
         })
-        //capture les erreur lors de la requete
         .catch((error) => {
           console.error(error);
         });

@@ -345,7 +345,6 @@ footer nav ul {
 .modal-principale,
 .modal-secondaire {
   width: 95%;
-  max-height: 630px;
   max-width: 430px;
   background-color: #ffffff;
   border-radius: 10px;
@@ -354,6 +353,10 @@ footer nav ul {
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 50px 100px;
+}
+
+.modal-secondaire {
+  max-height: 630px;
 }
 
 .modal-title-pricipale {
@@ -372,7 +375,7 @@ footer nav ul {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   grid-column-gap: 20px;
-  grid-row-gap: 20px;
+  grid-row-gap: 10px;
   margin-top: 60px;
 }
 
@@ -405,6 +408,7 @@ footer nav ul {
   text-align: center;
   border: none;
   cursor: pointer;
+  margin-top: 30px;
 }
 
 .arrow {
