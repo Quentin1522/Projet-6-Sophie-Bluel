@@ -29,7 +29,7 @@ async function displayWorks(filterWorks = null) {
     const figcaption = document.createElement("figcaption");
     const figure = document.createElement("figure");
 
-    //attribution des valeurs à chaque éléments en les récupérant via le tableau des works
+    //attribution des valeurs à chaque élément en les récupérant via le tableau des works
     img.src = works.imageUrl; //src = le format de la base de donnée
     figcaption.textContent = works.title; //title = le format de la base de donnée
 
@@ -48,20 +48,20 @@ async function getCategories() {
   const responseCategories = await fetch(
     "http://localhost:5678/api/categories"
   );
-  //retourne la liste des categori
+  //retourne la liste des catégorie
   return await responseCategories.json();
 }
 getCategories();
 ////////////////////////////////////////////
 
-//créer est afficher les bouttons de catégories
+//créer et affiché les boutons de catégories
 async function displayCategories() {
   //categories = liste des catégories
   const categories = await getCategories();
   categories.forEach((category) => {
-    //création des bouttons catégories
+    //création des boutons catégories
     const btnCategories = document.createElement("button");
-    //attribution des valeurs à chaque éléments en les récupérant via le tableau des catégories
+    //attribution des valeurs à chaque élément en les récupérant via le tableau des catégories
     btnCategories.textContent = category.name;
     btnCategories.id = category.id;
 
@@ -72,9 +72,9 @@ async function displayCategories() {
 displayCategories();
 ////////////////////////////////////////////
 
-//filter les catégories avec les boutons et changer la couleur des boutons de filtre
+//filtrer les catégories avec les boutons et changer la couleur des boutons de filtre
 async function filterByCategories() {
-  //récupere le tableau des works
+  //récupère le tableau des works
   const arrayWorks = await getWork();
 
   // Sélection de tous les boutons de filtre
@@ -116,7 +116,8 @@ textBanner.textContent = "Mode édition";
 const svgIconBanner = `
 <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#ffffff" d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152V424c0 48.6 39.4 88 88 88H360c48.6 0 88-39.4 88-88V312c0-13.3-10.7-24-24-24s-24 10.7-24 24V424c0 22.1-17.9 40-40 40H88c-22.1 0-40-17.9-40-40V152c0-22.1 17.9-40 40-40H200c13.3 0 24-10.7 24-24s-10.7-24-24-24H88z"/></svg>
 `;
-banner.appendChild(textBanner); //place textBanner dans la div Banner
+//place textBanner dans la div Banner
+banner.appendChild(textBanner);
 //ajoute la chaîne SVG en tant que nœud DOM à l'élément banner
 banner.innerHTML += svgIconBanner;
 
@@ -222,6 +223,12 @@ getWorkId();
 //récupération de case
 const contentAddImg = document.querySelector(".case");
 
+//récupération de content preview
+const contentPreview = document.querySelector(".content-preview");
+
+//création d'un élément image
+const previewImgSelected = document.createElement("img");
+
 // récupération du bouton qui permet de mettre une image
 const addImgBtn = document.getElementById("add-img-btn");
 
@@ -248,15 +255,17 @@ addImgBtn.addEventListener("input", () => {
       //création d'un objet URL pour l'image sélectionné
       const selectedImageUrl = URL.createObjectURL(selectedImage);
 
-      //création d'un élément image
-      const previewImgSelected = document.createElement("img");
       //ajout de l'image sélectionné dans l'élément image créer
       previewImgSelected.src = selectedImageUrl;
 
-      //vide "case" pour afficher l'image sélectionné
-      contentAddImg.innerHTML = "";
-      //mettre l'image sélectionné dans "case"
-      contentAddImg.appendChild(previewImgSelected);
+      //masque le boutton d'ajout d'image pour affchier la preview
+      contentAddImg.style.display = "none";
+
+      //affchier la preview
+      contentPreview.style.display = "block";
+
+      //mettre l'image sélectionné dans "content preview"
+      contentPreview.appendChild(previewImgSelected);
     }
 
     //catégories dynamique dans le formulaire d'envoie
@@ -277,30 +286,32 @@ addImgBtn.addEventListener("input", () => {
       .catch((error) => {
         console.error(error);
       });
-
-    // Sélectionnez le bouton Valider
-    const validerButton = document.getElementById("submitValider");
-
-    //change la couleur du boutton valiser quand une image est sélestionné
-    validerButton.style.backgroundColor = "#1d6154";
-    validerButton.style.color = "white";
   }
 });
+// Sélectionnez le bouton Valider
+const validerButton = document.getElementById("submitValider");
+
+//change la couleur du boutton valiser quand une image est sélestionné
+validerButton.style.backgroundColor = "#1d6154";
+validerButton.style.color = "white";
 ////////////////////////////////////////////
 
 //fonction add work
 function addWork() {
+  //récupération du formulaire
+  const form = document.getElementById("addWorkForm");
+
   //récupérer de la span "erreur un champ n'est pas remplie"
   const erreurChampVide = document.getElementById("error-messageChamp");
-
-  const form = document.getElementById("addWorkForm");
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
 
+    //récupération des champs du formulaire
     const titleChamp = document.getElementById("title").value.trim();
     const selectCategoriesChamp = document.getElementById("categorie").value;
 
+    //vérification du remplisage des champs
     if (
       titleChamp === "" ||
       selectCategoriesChamp === "" ||
@@ -308,12 +319,11 @@ function addWork() {
     ) {
       erreurChampVide.textContent = "Un des champs est vide.";
     } else {
+      //remplisage de forData
       const formData = new FormData();
       formData.append("image", addImgBtn.files[0]);
       formData.append("title", titleChamp);
       formData.append("category", selectCategoriesChamp);
-
-      const token = localStorage.getItem("token");
 
       fetch("http://localhost:5678/api/works", {
         method: "POST",
@@ -322,6 +332,7 @@ function addWork() {
         },
         body: formData,
       })
+        //traitement de la réponse
         .then((response) => {
           if (!response.ok) {
             throw new Error("Erreur lors de l'ajout de l'œuvre");
@@ -330,8 +341,17 @@ function addWork() {
         })
         .then((data) => {
           console.log("Réponse de la requête : ", data);
+
+          //appel des fonctions d'affichage des works et des works dana la modal
           displayWorkModal();
           displayWorks();
+
+          //reset img
+          contentAddImg.style.display = "flex";
+          contentPreview.style.display = "none";
+
+          //reset title & catégories
+          form.reset();
         })
         .catch((error) => {
           console.error(error);
@@ -339,6 +359,7 @@ function addWork() {
     }
   });
 }
+
 addWork();
 /////////////////////////////////////
 
