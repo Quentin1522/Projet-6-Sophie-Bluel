@@ -85,7 +85,9 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .catch((error) => {
         console.error("Login failed:", error);
-        alert("Erreur dans l’identifiant ou le mot de passe.");
+        const errorForm = document.querySelector(".errorForm");
+        errorForm.textContent =
+          "L'adresse mail ou le mot de passe n'est pas correct.";
       });
   }
 

@@ -352,6 +352,8 @@ function addWork() {
 
           //reset title & catégories
           form.reset();
+          const addProject = document.getElementById("addProject");
+          addProject.textContent = "Projet ajouté avec succès";
         })
         .catch((error) => {
           console.error(error);

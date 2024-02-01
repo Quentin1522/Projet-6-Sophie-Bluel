@@ -539,3 +539,18 @@ select {
   display: inline-block;
   margin-left: 10px;
 }
+
+.errorFormDiv {
+  margin: 20px;
+}
+
+.errorForm,
+#error-messageChamp {
+  color: red;
+}
+
+.messageForm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
