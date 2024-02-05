@@ -105,6 +105,7 @@ async function filterByCategories() {
     });
   });
 }
+
 filterByCategories();
 ////////////////////////////////////////////
 
@@ -346,6 +347,7 @@ function addWork() {
           displayWorkModal();
           displayWorks();
 
+          filterByCategories();
           //reset img
           contentAddImg.style.display = "flex";
           contentPreview.style.display = "none";
